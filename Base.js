@@ -46,11 +46,23 @@ define(function() {
         }
     };
 
+    Object.prototype.superMethod = function(name, args){
+        var func = (this.constructor.getAdapter())[name] || (this.constructor.prototype)[name];
+        if(typeof func === 'function'){
+            func.apply(this, args);
+        }
+        return this;
+    };
+
     Function.prototype.method = function (type, func) {
         if (!this.prototype[type]) {
             this.prototype[type] = func;
         }
         return this;
+    };
+
+    Function.prototype.superMethod = function(name){
+        return (this.getAdapter() || this.prototype)[name];
     };
 
     Function.prototype.implementMethods = function (funcObj) {

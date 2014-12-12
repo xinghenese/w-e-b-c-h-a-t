@@ -10,6 +10,7 @@ define(function(){
         VALUE_INVALID:          "INVALID",
         ARRAY_NOT_SET:          [],
         OBJECT_NOT_SET:         {},
+        FUNCTION_NOT_SET:       function(){},
 
         CONNECT_TIMEOUT:        20 * 1000,
         ONE_YEAR:               12 * 30 * 24 * 60 * 60 * 1000,

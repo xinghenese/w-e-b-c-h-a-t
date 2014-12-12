@@ -8,7 +8,8 @@ define(['Utils/CommonUtils', 'Logger/Logger'], function(CommonUtils, Logger){
         url:        CommonUtils.STRING_NOT_SET,
         arguments:  CommonUtils.OBJECT_NOT_SET,
         task:       CommonUtils.STRING_NOT_SET,
-        handler:    CommonUtils.FUNCTION_NOT_SET
+        handler:    CommonUtils.FUNCTION_NOT_SET,
+        error:      CommonUtils.FUNCTION_NOT_SET
     };
 
     //Prototype: define methods which are shared by all instances and cannot overrides

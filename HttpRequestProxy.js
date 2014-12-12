@@ -38,12 +38,6 @@ define(['Utils/CommonUtils', 'CoreSettings', 'Logger/Logger', 'Base'], function(
     };
 
     var HttpProtocolPacketPrototype = {
-        getAdapter: function(){
-            return HttpProtocolPacketAdapter;
-        },
-        superMethod: function(name){
-            (this.getAdapter() || this.constructor.prototype)[name].call(this);
-        },
         sendHttpRequest: function() {
             var _send, _self = this;
             var xhr = new XMLHttpRequest();
@@ -137,6 +131,9 @@ define(['Utils/CommonUtils', 'CoreSettings', 'Logger/Logger', 'Base'], function(
 //    var b = (a + Math.log(Math.abs(x))/Math.log(10))/(Math.LOG10E/Math.LOG2E);
 
     HttpProtocolPacket.inherits(HttpProtocolPacketPrototype);
+    HttpProtocolPacket.getAdapter = function(){
+        return HttpProtocolPacketAdapter;
+    };
 //    HttpProtocolPacket.createProtocolPacket = function(obj){
 //        var _packet = new HttpProtocolPacket();
 //        var _adapter = HttpProtocolPacketAdapter;
