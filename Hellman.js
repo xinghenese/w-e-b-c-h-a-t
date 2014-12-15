@@ -22,14 +22,10 @@ define(['Coder', "HttpRequestProxy", "ThreadProxy", 'Utils/CookieUtil', 'Logger/
         g: BASE,
         priv: "1926877662633358844204024729202550362056900610652831479170955612156095738332170432108364352536733746571489",
         createPublicKey: function(){
-//            return this.g.modPow(this.priv, this.p)
-//            return this.g.modPow(this.priv, this.p)
-        },
-        getPublicKey: function(){
 //            return this.createPublicKey();
             if(!publicKey){
                 var _self = this;
-                thread = ThreadProxy.createThread({
+                ThreadProxy.startThread({
                     url: "BigInteger2.js",
                     task: "createHellmanKey",
                     arguments: {
@@ -44,60 +40,45 @@ define(['Coder', "HttpRequestProxy", "ThreadProxy", 'Utils/CookieUtil', 'Logger/
                         Logger.info("Exp", evt.data.exp);
                         Logger.info("Remainder", evt.data.remainder);
                         Logger.info("PublicKey", publicKey);
-                        HttpRequestProxy.request({
-                            urlPath: "user/prepare",
-                            requestData: {
-                                pkey: publicKey
-                            },
-                            onDataSuccess: function(data){
-                                thread.reuse({
-                                    arguments: {
-                                        prime: _self.p,
-                                        base: publicKey,
-                                        exp: _self.priv
-                                    },
-                                    handler: function(evt){
-                                        sharedKey = Coder.encodeBase64(evt.data.remainder);//toByteArray
-                                        Logger.info("Prime", evt.data.prime);
-                                        Logger.info("Base", evt.data.base);
-                                        Logger.info("Exp", evt.data.exp);
-                                        Logger.info("Remainder", evt.data.remainder);
-                                        Logger.info("SharedKey", sharedKey);
-                                        CookieUtil.setCookie("RCKey", sharedKey);
-                                    }
-                                });
-                            }
-                        });
-
+                        _self.createSharedKey(publicKey);
                     }
                 });
-                thread.start();
             }
             return publicKey;
         },
-        getShared: function(pub){
+        createSharedKey: function(pub){
             if(!pub){
                 return "";
             }
             if(!sharedKey){
                 var _self = this;
-                thread.reuse({
-                    arguments: {
-                        prime: _self.p,
-                        base: pub,
-                        exp: _self.priv,
-                        task: "createHellmanKey"
+                HttpRequestProxy.request({
+                    urlPath: "user/prepare",
+                    requestData: {
+                        pkey: publicKey
                     },
-                    handler: function(evt){
-                        sharedKey = Coder.encodeBase64(evt.data.remainder);//toByteArray
-                        Logger.info("Prime", evt.data.prime);
-                        Logger.info("Base", evt.data.base);
-                        Logger.info("Exp", evt.data.exp);
-                        Logger.info("Remainder", evt.data.remainder);
+                    onDataSuccess: function(data){
+                        ThreadProxy.startThread({
+                            url: "BigInteger2.js",
+                            task: "createHellmanKey",
+                            arguments: {
+                                prime: _self.p,
+                                base: publicKey,
+                                exp: _self.priv
+                            },
+                            handler: function(evt){
+                                sharedKey = Coder.encodeBase64(evt.data.remainder);//toByteArray
+                                Logger.info("Prime", evt.data.prime);
+                                Logger.info("Base", evt.data.base);
+                                Logger.info("Exp", evt.data.exp);
+                                Logger.info("Remainder", evt.data.remainder);
+                                Logger.info("SharedKey", sharedKey);
+                                RCKey = _self.createRCKey(sharedKey);
+                                CookieUtil.setCookie("RCKey", RCKey);
+                            }
+                        });
                     }
                 });
-                thread.stop();
-                //sharedKey = pub.modPow(this.priv, this.p);
             }
             return sharedKey;
         },
