@@ -2,13 +2,16 @@
  * Created by Administrator on 2014/12/4.
  */
 define(['Utils/CommonUtils', 'CoreSettings', 'Logger/Logger', 'Base'], function(CommonUtils, CoreSettings, Logger){
-    var HttpProtocolPacketAdapter = {
+    var PacketConfigAdapter = {
         method: "POST",
-        urlRoot: CoreSettings.getHttpRequestUrlRoot(),
+        urlRoot: CoreSettings.getHttpRequestUrlRoot,
         urlPath: "",
         requestData: "",
         needDecrypt: true,
-        timeout: CommonUtils.CONNECT_TIMEOUT,
+        timeout: CommonUtils.CONNECT_TIMEOUT
+    };
+
+    var PacketProcessorAdapter = {
         callback: CommonUtils.FUNCTION_NOT_SET,
         onFailed: CommonUtils.FUNCTION_NOT_SET,
         onComplete: CommonUtils.FUNCTION_NOT_SET,
@@ -112,48 +115,19 @@ define(['Utils/CommonUtils', 'CoreSettings', 'Logger/Logger', 'Base'], function(
         }
     };
 
-    var HttpProtocolPacket = function(){
-
+    var HttpProtocolPacket = function(obj){
+        CommonUtils.COMMON_CONSTRUCTOR.call(this, obj, PacketConfigAdapter);
+        CommonUtils.COMMON_CONSTRUCTOR.call(this, obj, PacketProcessorAdapter);
     };
-
-//    HttpProtocolPacket.inherits(HttpProtocolPacketPrototype).
-//    staticMethod("createProtocolPacket", function(obj){
-//        var _packet = new HttpProtocolPacket();
-//        for(var key in obj){
-//            if(obj.hasOwnProperty(key) && (typeof _packet[key] !== "undefined")){
-//                _packet[key] = obj[key];
-//            }
-//        }
-//        return _packet;
-//    });
-
-
-//    var b = (a + Math.log(Math.abs(x))/Math.log(10))/(Math.LOG10E/Math.LOG2E);
 
     HttpProtocolPacket.inherits(HttpProtocolPacketPrototype);
     HttpProtocolPacket.getAdapter = function(){
-        return HttpProtocolPacketAdapter;
+        return PacketConfigAdapter;
     };
-//    HttpProtocolPacket.createProtocolPacket = function(obj){
-//        var _packet = new HttpProtocolPacket();
-//        var _adapter = HttpProtocolPacketAdapter;
-//        for(var key in _adapter){
-//            if(_adapter.hasOwnProperty(key)){
-//                _packet[key] = obj[key] || _adapter[key];
-//            }
-//        }
-//        return _packet;
-//    };
 
     return {
         request: function(obj){
-            var _packet = new HttpProtocolPacket();
-            var _adapter = HttpProtocolPacketAdapter;
-            for(var key in _adapter){
-                if(_adapter.hasOwnProperty(key)){
-                    _packet[key] = obj[key] || _adapter[key];
-                }
-            }
+            var _packet = new HttpProtocolPacket(obj);
             _packet.sendHttpRequest();
         }
     };
