@@ -7,7 +7,7 @@ define(['Coder', "HttpRequestProxy", "ThreadProxy", 'Utils/CookieUtil', 'Logger/
     var privateKey = "";
     var publicKey = "";
     var sharedKey = "";
-    var thread;
+    var RCKey;
 
 //    for (var i = 0; i < 12; i++)
 //    {
@@ -73,8 +73,9 @@ define(['Coder', "HttpRequestProxy", "ThreadProxy", 'Utils/CookieUtil', 'Logger/
                                 Logger.info("Exp", evt.data.exp);
                                 Logger.info("Remainder", evt.data.remainder);
                                 Logger.info("SharedKey", sharedKey);
-                                RCKey = _self.createRCKey(sharedKey);
-                                CookieUtil.setCookie("RCKey", RCKey);
+//                                RCKey = _self.createRCKey(sharedKey);
+//                                CookieUtil.setCookie("RCKey", RCKey);
+                                CookieUtil.setCookie("Key", sharedKey);
                             }
                         });
                     }
@@ -82,7 +83,7 @@ define(['Coder', "HttpRequestProxy", "ThreadProxy", 'Utils/CookieUtil', 'Logger/
             }
             return sharedKey;
         },
-        getRCKey: function(pub){
+        createRCKey: function(pub){
             //var bitIntSecretKey = this.getShared(BigInteger(pub).abs());
             //var result = Coder.encodeBase64(bitIntSecretKey);//toByteArray
             //return

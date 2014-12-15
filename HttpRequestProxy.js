@@ -4,7 +4,7 @@
 define(['Utils/CommonUtils', 'CoreSettings', 'Logger/Logger', 'Base'], function(CommonUtils, CoreSettings, Logger){
     var PacketConfigAdapter = {
         method: "POST",
-        urlRoot: CoreSettings.getHttpRequestUrlRoot,
+        urlRoot: CoreSettings.getHttpRequestUrlRoot(),
         urlPath: "",
         requestData: "",
         needDecrypt: true,
