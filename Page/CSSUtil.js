@@ -1,7 +1,7 @@
 /**
  * Created by Administrator on 2014/12/15.
  */
-define(function(){
+define(['../TypeCheck'], function(TypeCheck){
     return {
         cssFormat: function(input){
             return input.replace(/([A-Z])/g, function(){
@@ -10,6 +10,11 @@ define(function(){
                     return '-' + _s1.toLowerCase();
                 }
             });
+        },
+        classify: function(obj){
+            if(TypeCheck.isObject(obj)){
+
+            }
         },
         toCSSText: function(obj){
             var result = "";

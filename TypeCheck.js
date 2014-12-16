@@ -38,6 +38,9 @@ define(function(){
         isArray: function(arr){
             return toString.call(arr) == "[object Array]";
         },
+        likeArray: function(list){
+            return typeof list.length == "number";
+        },
         isXMLDocument: function(xml){
             return toString.call(xml) == "[object XMLDocument]";
         },
@@ -48,7 +51,10 @@ define(function(){
             return toString.call(doc) == "[object HTMLDocument]";
         },
         isHTMLElement: function(element){
-            return toString.call(element) == "[object HTMLHtmlElement]";
+            return toString.call(element).search(/^\[object HTML.*Element\]$/) != -1;
+        },
+        isNodeList: function(nodeList){
+            return toString.call(nodeList) == "[object NodeList]";
         }
     }
 });

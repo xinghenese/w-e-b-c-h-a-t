@@ -196,10 +196,7 @@ define(['Page/TreeType', 'TypeCheck', 'CSSUtil'], function(TreeType, TypeCheck, 
             return TreeType.HTMLDocument;
         },
         getRoot: function(){
-            if(!this.root){
-                this.root = document.createElement("div");
-            }
-            return this.root;
+            return document.createElement("div");
         }
     });
 

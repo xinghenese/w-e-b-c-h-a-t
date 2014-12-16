@@ -101,7 +101,7 @@ define(['../Base', 'TreeType'], function(Base, TreeType){
             }
             if(_resultTree.getTreeType() == TreeType.HTMLDocument){
                 if(_targetRoot){
-                    document.body.appendChild(_targetRoot);
+                    return document.body.appendChild(_targetRoot);
                 }
             }
             return _resultTree;

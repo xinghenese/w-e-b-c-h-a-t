@@ -161,12 +161,12 @@ define('Base', ['TreeType', 'CSSUtil'], function(TreeType, CSSUtil){
                             for(var i = 0; i < _len; i++){
                                 _subNodeKeys.push(key + "-" + i);
                             }
-                            console.log("checkSubNodes: " + _subNodeKeys);
+//                            console.log("checkSubNodes: " + _subNodeKeys);
                             _hasChild = true;
                         }
                         else if(typeof(_self[key]) == "object"){
                             if(key == "style"){
-                                console.log(_self[key]);
+//                                console.log(_self[key]);
                                 _self[key] = CSSUtil.toCSSText(_self[key]);
                             }
                             else{
@@ -185,14 +185,14 @@ define('Base', ['TreeType', 'CSSUtil'], function(TreeType, CSSUtil){
         },
         getSubNodeByKey: function(key){
             //key = (mapConversion && mapConversion[key]) || key;
-            console.log("key: " + key);
-            console.log("getSubNodeByKey: " + this[key]);
+//            console.log("key: " + key);
+//            console.log("getSubNodeByKey: " + this[key]);
             var _info = key.split('-'),
                 _key = _info[0],
                 _index = _info[1];
-            console.log("_key: " + _key + "\t _index: " + _index);
+//            console.log("_key: " + _key + "\t _index: " + _index);
             if(_index == +_index){
-                console.log("this[" + _key + "][" + _index+ "]: " + this[_key][_index]);
+//                console.log("this[" + _key + "][" + _index+ "]: " + this[_key][_index]);
                 return this[_key][_index];
             }
             return this[_key];
@@ -225,7 +225,7 @@ define('Base', ['TreeType', 'CSSUtil'], function(TreeType, CSSUtil){
 
     Document.implementMethods({
         getTreeType: function(){
-            console.log("XMLDocument");
+//            console.log("XMLDocument");
             return TreeType.XMLDocument;
         },
         getRoot: function(root){
@@ -235,14 +235,11 @@ define('Base', ['TreeType', 'CSSUtil'], function(TreeType, CSSUtil){
 
     HTMLDocument.implementMethods({
         getTreeType: function(){
-            console.log("HTMLDocument");
+//            console.log("HTMLDocument");
             return TreeType.HTMLDocument;
         },
         getRoot: function(){
-            if(!this.root){
-                this.root = document.createElement("div");
-            }
-            return this.root;
+            return document.createElement("div");
         }
     });
 
@@ -284,7 +281,7 @@ define('Base', ['TreeType', 'CSSUtil'], function(TreeType, CSSUtil){
 
     HTMLElement.implementMethods({
         createAndAppendChild: function(tag, tree, mapConversion){
-            console.log("createAndAppendChild: tag: " + tag);
+//            console.log("createAndAppendChild: tag: " + tag);
             var arr = tag.split('-');
             tag = (mapConversion && mapConversion[arr[0]]) || arr[0];
             if(tag == "text"){
@@ -368,7 +365,7 @@ define('DocumentFactory', ['Base', 'TreeType'], function(Base, TreeType){
             var _targetNode, _targetRoot, _targetRootsInfo = [], _resultTree;
             //check
             if(!sourceTree.getTreeType || !sourceTree.getTreeType() || sourceTree.getTreeType() == toType){
-                console.log("check");
+//                console.log("check");
                 return sourceTree;
             }
             while(_len > 0 || _initializing()){
@@ -403,7 +400,7 @@ define('DocumentFactory', ['Base', 'TreeType'], function(Base, TreeType){
             }
             if(_resultTree.getTreeType() == TreeType.HTMLDocument){
                 if(_targetRoot){
-                    document.body.appendChild(_targetRoot);
+                    return document.body.appendChild(_targetRoot);
                 }
             }
             return _resultTree;
@@ -414,11 +411,13 @@ define('DocumentFactory', ['Base', 'TreeType'], function(Base, TreeType){
 
                 _resultTree = _createEmptyTree(_sourceRoot, toType, mapConversion);
                 _targetRoot = _resultTree.getRoot();
+//                console.info(_targetRoot);
                 _targetNode = _targetRoot;
 
                 var _sourceNodeInfo = _sourceNode.checkSubNodes();
                 _sourceNode.parseAttributes(_targetNode, mapConversion);
-                console.log("id: " + _targetNode.getAttribute("id"));
+//                console.log("id: " + _targetNode.getAttribute("id"));
+//                console.info(_targetRoot);
 
                 if(_sourceNodeInfo){
                     _sourceRootsInfo.push(_sourceNodeInfo);
@@ -436,8 +435,10 @@ define('DocumentFactory', ['Base', 'TreeType'], function(Base, TreeType){
 //                console.log("ClassMap[_name]: " + ClassMap[_name]);
                 switch(toType){
                     case TreeType.XMLDocument:
+//                        console.info("XMLDocument");
                         return DocumentFactory.createDocument(_name);
                     case TreeType.HTMLDocument:
+//                        console.info("HTMLDocument");
                         return document;
 //                    case TypeMap.Wrapper:
 //                        return (ClassMap[_name] && ClassMap[_name].createInstance()) || {};
@@ -451,80 +452,191 @@ define('DocumentFactory', ['Base', 'TreeType'], function(Base, TreeType){
 });
 
 
-require(['DocumentFactory', 'TreeType', '$'], function(DocumentFactory, TreeType, $){
-    var dialog;
+require(['DocumentFactory', 'TreeType', '$', '../TypeCheck'], function(DocumentFactory, TreeType, $, TypeCheck){
+    var dialog, userlist;
     function showDialog(msg){
         if(!dialog){
-            dialog = createMsgBox();
+            dialog = createBox();
+        }
+        if(!userlist){
+            userlist = createUserList();
         }
     }
 
     function createBox(){
         var box = $.createPanel({
-            div: {
-                id: "msgBox",
-                style: {
-                    width: "466px",
-                    height: "245px",
-                    position: "absolute",
-                    backgroundColor: "#FFFFFF"
-                },
-                div: [{
-                        id: "title",
-                        style: {
-                            width: "100%",
-                            height: "50px",
-                            backgroundColor: "#F8F8F4"
-                        }
-                    },{
-                        id: "content",
-                        style: {
-                            width: "422px",
-                            height: "125px",
-                            margin: "22px",
-                            marginBottom: "0",
-                            backgroundColor: "#F8F8F7"
-                        }
-                    },{
-                        id: "btnSend",
-                        text: "Send",
-                        style: {
-                            width: "82px",
-                            height: "30px",
-                            marginTop: "10px",
-                            backgroundColor: "#42D9C7",
-                            color: "#FFFFFF"
-                        }
-                    }]
-            }
+            id: "msgBox",
+            style: {
+                width: "464px",
+                height: "243px",
+                position: "absolute",
+                color: "#1d1d1d",
+                backgroundColor: "#FFFFFF"
+            },
+            div: [{
+                    id: "box_title",
+                    text: "意见反馈",
+                    style: {
+                        width: "100%",
+                        height: "52px",
+                        backgroundColor: "#F8F8F4",
+                        font: "14px 宋体"
+                    }
+                },{
+                    id: "box_content",
+                    style: {
+                        width: "422px",
+                        height: "125px",
+                        margin: "16px 20px 0",
+                        backgroundColor: "#F8F8F7"
+                    }
+                },{
+                    id: "btnSend",
+                    text: "发送",
+                    style: {
+                        width: "82px",
+                        height: "30px",
+                        marginTop: "10px",
+                        backgroundColor: "#21b69d",
+                        color: "#FFFFFF",
+                        font: "14px 宋体",
+                        cursor: "pointer"
+                    }
+                }, {
+                    id: "btnClose",
+                    text: "\u00D7",
+                    style: {
+                        width: "52px",
+                        height: "52px",
+                        position: "absolute",
+                        top: "0",
+                        right: "0",
+                        color: "#181818",
+                        font: "40px 宋体",
+                        cursor: "pointer"
+                    }
+                }]
         }, TreeType.HTMLDocument);
 
-        setCenter(box);
-        setVerticalAlign([document.querySelector('#content'), document.querySelector('#btnSend')], "right");
-        setTextCenter(document.querySelector('#btnSend'));
+        box.setCenter();
+        $('#box_title, #btnClose', box).setTextCenter();
+        $('#box_content, #btnSend', box).setVerticalAlign('right').setTextCenter();
 
-        var _xml = DocumentFactory.parseTree({
-            div: {
-                id: "msgBox",
-                div: [
-                    {
-                        id: "title"
-                    },
-                    {
-                        id: "content"
-                    },
-                    {
-                        id: "btnSend",
-                        style: {
-                            width: "200px",
-                            height: "80px",
-                            backgroundColor: "#DDDDDD"
-                        }
+        return box;
+
+//        var _xml = DocumentFactory.parseTree({
+//            div: {
+//                id: "msgBox",
+//                div: [
+//                    {
+//                        id: "title"
+//                    },
+//                    {
+//                        id: "content"
+//                    },
+//                    {
+//                        id: "btnSend",
+//                        style: {
+//                            width: "200px",
+//                            height: "80px",
+//                            backgroundColor: "#DDDDDD"
+//                        }
+//                    }
+//                ]
+//            }
+//        }, TreeType.XMLDocument);
+//        console.log(DocumentFactory.parseXMLToString(_xml));
+    }
+
+
+    function createUserList(){
+        var view = $.createPanel({
+            id: "userlist",
+            style: {
+                width: "280px",
+                height: "800px",
+                position: "absolute",
+                top: "100px",
+                left: "200px",
+                backgroundColor: "#e9eee3"
+            },
+            div: [{
+                id: "list_title",
+                style: {
+                    width: "100%",
+                    height: "52px",
+                    backgroundColor: "#2fd5d9"
+                }
+            }, {
+                id: "myAvatar",
+                style: {
+                    width: "58px",
+                    height: "58px",
+                    position: "absolute",
+                    top: "11px",
+                    left: "14px",
+                    borderRadius: "29px",
+                    backgroundColor: "#FFFFFF"
+                }
+            }, {
+                id: "myName",
+                text: "佳宁",
+                style: {
+                    width: "80px",
+                    height: "14px",
+                    position: "absolute",
+                    left: "91px",
+                    top: "22px",
+                    color: "#0d6359",
+                    font: "14px 宋体",
+                    lineHeight: "14px"
+                }
+           }, {
+                id: "search_bar",
+                style: {
+                    width: "auto",
+                    height: "33px",
+                    margin: "42px 13px 7px 9px"
+                },
+                input: {
+                    type: "text",
+                    id: "search",
+                    value: "请输入呢称\\聊聊号",
+                    style: {
+                        width:"auto",
+                        height: "100%",
+                        margin: "0 39px 0 0",
+                        border: "1px #d0d5ca solid",
+                        padding: "6px 10px",
+                        font: "14px 宋体",
+                        lineHeight: "21px",
+                        color: "#bfc4b9"
                     }
-                ]
-            }
-        }, TreeType.XMLDocument);
-        console.log(DocumentFactory.parseXMLToString(_xml));
+                }//,
+//                div: {
+//                    id: "search_button",
+//                    text: "\u25CB",
+//                    style: {
+//                        width: "39px",
+//                        height: "100%",
+//                        position: "relative",
+//                        top: "-100%",
+//                        left: "219px",
+//                        border: "1px #d0d5ca solid",
+//                        backgroundColor: "#FAFFF4"
+//                    }
+//                }
+            }]
+
+        });
+
+//        $('#search', view).modifyStyle(function(){
+////            this.borderBox();
+//            this.style.width = "200px";
+//        });
+//        $('#search_button', view).modifyStyle(function(){
+//            this.borderBox();
+//        });
     }
 
 
@@ -591,7 +703,7 @@ require(['DocumentFactory', 'TreeType', '$'], function(DocumentFactory, TreeType
     }
 
     function setVerticalAlign(arrElement, direction){
-        if(arrElement && isArray(arrElement)){
+        if(arrElement && TypeCheck.isArray(arrElement)){
             direction = direction != "right";
             var len = arrElement.length,
                 max = findMax(arrElement, function(i){
@@ -624,7 +736,7 @@ require(['DocumentFactory', 'TreeType', '$'], function(DocumentFactory, TreeType
 
     function setTextCenter(element){
         if(element && element.nodeType == 1){
-            console.log("element");
+//            console.log("element");
             element.style.textAlign = "center";
             element.style.lineHeight = element.style.height;
         }
@@ -636,7 +748,7 @@ require(['DocumentFactory', 'TreeType', '$'], function(DocumentFactory, TreeType
 
     }
 
-//    showDialog();
+    showDialog();
 
-    createBox();
+//    createBox();
 });
