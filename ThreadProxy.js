@@ -1,14 +1,17 @@
 /**
  * Created by Administrator on 2014/12/9.
  */
-define(['Utils/CommonUtils', 'Logger/Logger'], function(CommonUtils, Logger){
+define(['Base', 'Utils/CommonUtils', 'Logger/Logger'], function(Base, CommonUtils, Logger){
     //Adapter: define methods which can overrides.
-    var threadAdapter = {
+    var threadConfigAdapter = {
         url:        CommonUtils.STRING_NOT_SET,
         arguments:  CommonUtils.OBJECT_NOT_SET,
-        task:       CommonUtils.STRING_NOT_SET,
+        task:       CommonUtils.STRING_NOT_SET
+    };
+
+    var threadListenerAdapter = {
         handler:    CommonUtils.FUNCTION_NOT_SET,
-        error:      function(evt){
+        onerror:      function(evt){
             Logger.error("Thread " + this.id, "worker.error: " + evt.message + "(" + evt.filename + ": " + evt.lineno + ")");
         }
     };
@@ -24,7 +27,7 @@ define(['Utils/CommonUtils', 'Logger/Logger'], function(CommonUtils, Logger){
                 }
                 var worker = this.worker;
                 worker.onmessage = this.handler;
-                worker.onerror = this.error;
+                worker.onerror = this.onerror;
                 worker.postMessage({
                     arguments: JSON.stringify(this.arguments),
                     task: this.task
@@ -55,7 +58,8 @@ define(['Utils/CommonUtils', 'Logger/Logger'], function(CommonUtils, Logger){
 
     //Constructor: to create an instance which inherits the Prototype
     var Thread = function(obj){
-        CommonUtils.COMMON_CONSTRUCTOR.call(this, obj, threadAdapter);
+        CommonUtils.COMMON_CONSTRUCTOR.call(this, obj, threadConfigAdapter);
+        CommonUtils.COMMON_CONSTRUCTOR.call(this, obj, threadListenerAdapter);
     };
     Thread.inherits(ThreadPrototype);
 

@@ -271,7 +271,9 @@ define('Base', ['TreeType', 'CSSUtil'], function(TreeType, CSSUtil){
         },
         copyAttributes: function(key, value){
 //            this.setAttribute(key, (ClassMap[value] ? "" : value));
-            this.setAttribute(key, value);
+            if(key !== "text"){
+                this.setAttribute(key, value);
+            }
         },
         createAndAppendChild: function(tag, tree, mapConversion){
             tag = (mapConversion && mapConversion[tag.split('-')[0]]) || tag.split('-')[0];
@@ -452,7 +454,7 @@ define('DocumentFactory', ['Base', 'TreeType'], function(Base, TreeType){
 });
 
 
-require(['DocumentFactory', 'TreeType', '$', '../TypeCheck'], function(DocumentFactory, TreeType, $, TypeCheck){
+require(['$'], function($){
     var dialog, userlist;
     function showDialog(msg){
         if(!dialog){
@@ -516,7 +518,7 @@ require(['DocumentFactory', 'TreeType', '$', '../TypeCheck'], function(DocumentF
                         cursor: "pointer"
                     }
                 }]
-        }, TreeType.HTMLDocument);
+        });
 
         box.setCenter();
         $('#box_title, #btnClose', box).setTextCenter();
@@ -547,7 +549,6 @@ require(['DocumentFactory', 'TreeType', '$', '../TypeCheck'], function(DocumentF
 //        }, TreeType.XMLDocument);
 //        console.log(DocumentFactory.parseXMLToString(_xml));
     }
-
 
     function createUserList(){
         var view = $.createPanel({
@@ -592,56 +593,87 @@ require(['DocumentFactory', 'TreeType', '$', '../TypeCheck'], function(DocumentF
                     lineHeight: "14px"
                 }
            }, {
+                id: "select",
+                text: "\u2714",
+                style: {
+                    width: "16px",
+                    height: "14px",
+                    position: "absolute",
+                    top: "62px",
+                    right: "36px",
+                    border: "1px #d0d5ca solid",
+                    borderRadius: "4px",
+                    backgroundColor: "#FFFFFF",
+                    color: "#2fd5b9"
+                }
+            },{
                 id: "search_bar",
                 style: {
                     width: "auto",
                     height: "33px",
-                    margin: "42px 13px 7px 9px"
+                    margin: "42px 13px 7px 9px",
+                    border: "1px #d0d5ca solid",
+                    backgroundColor: "#d0d5ca"
                 },
                 input: {
                     type: "text",
                     id: "search",
                     value: "请输入呢称\\聊聊号",
                     style: {
-                        width:"auto",
+                        width:"159px",
                         height: "100%",
-                        margin: "0 39px 0 0",
+                        display: "inline-block",
+                        marginRight: "4px",
                         border: "1px #d0d5ca solid",
                         padding: "6px 10px",
                         font: "14px 宋体",
-                        lineHeight: "21px",
                         color: "#bfc4b9"
                     }
-                }//,
-//                div: {
-//                    id: "search_button",
-//                    text: "\u25CB",
+                },
+                div: [//{
+//                    id: "search",
+//                    text: "请输入呢称\\聊聊号",
 //                    style: {
-//                        width: "39px",
+//                        width:"159px",
 //                        height: "100%",
+//                        backgroundColor: "#FFFFFF",
+//                        marginRight: "1px",
+//                        padding: "6px 10px",
+//                        font: "14px 宋体",
+//                        color: "#bfc4b9"
+//                    }
+//                },
+    {
+                    id: "search_button",
+                    text: "s",
+                    style: {
+                        width: "39px",
+                        height: "100%",
 //                        position: "relative",
 //                        top: "-100%",
 //                        left: "219px",
-//                        border: "1px #d0d5ca solid",
-//                        backgroundColor: "#FAFFF4"
-//                    }
-//                }
+                        marginRight: "1px",
+                        backgroundColor: "#FAFFF4",
+                        color: "#bfc4b9"
+                    }
+                }, {
+                    id: "search_button2",
+                    text: "sa",
+                    style: {
+                        width: "39px",
+                        height: "100%",
+                        marginRight: "1px",
+                        backgroundColor: "#FAFFF4",
+                        color: "#bfc4b9"
+                    }
+                }]
             }]
-
         });
 
-        var a = $('#search', view);
-        console.log("width: " + a.getMessureDigits("width"));
-        console.log("height: " + a.getMessureDigits("height"));
-        $.borderBox(a);
-//        a.modifyStyle($.borderBox, a);
-//        $('#search', view).modifyStyle(function(){
-////            this.borderBox();
-////            this.style.width = "200px";
-//        });
-//        $('#search_button', view).modifyStyle(function(){
-//            this.borderBox();
-//        });
+        $('#search, #search_button, #search_button2', view).float().borderBox().setTextCenter();
+//        $('#search, #search_button, #search_button2', view).borderBox().setTextCenter();
+        $('#select', view).setTextCenter();
+
     }
 
 
@@ -658,100 +690,11 @@ require(['DocumentFactory', 'TreeType', '$', '../TypeCheck'], function(DocumentF
      5. append container to document and expose its id or class
      */
 
-    function createMsgBox(){
-        var _doc = document;
-        var msgbox = _doc.createElement("div");
-        msgbox.style.cssText = "width: 466px; height: 245px; position: absolute; background-color: #FFFFFF;";
-        setCenter(msgbox);
-        var title = _doc.createElement("div");
-        title.style.cssText = "width: 100%; height: 50px; background-color: #F8F8F4";
-        var content = _doc.createElement("div");
-        content.style.cssText = "width: 422px; height: 125px; margin: 22px; margin-bottom: 0;background-color: #F8F8F7";
-//        var btnClose = _doc.createElement("div");
-//        var btnConfirm = _doc.createElement("div");
-//        var btnCancel = _doc.createElement("div");
-        var btnSend = _doc.createElement("div");
-        btnSend.style.cssText = "width: 82px; height: 30px; margin-top: 10px; background-color: #42D9C7";
-
-
-        msgbox.appendChild(title);
-        msgbox.appendChild(content);
-        msgbox.appendChild(btnSend);
-
-        setVerticalAlign([content, btnSend], "right");
-
-        _doc.body.appendChild(msgbox);
-        return msgbox;
-    }
-
-    function createConatiner(){
-
-    }
-
-    function setStyle(cssText){
-
-    }
-
-    function isArray(array){
-        return Object.prototype.toString.call(array) == "[object Array]";
-    }
-
-    function findMax(array, prop, elementOrValue){
-        var _max = 0, _i_max = 0, len = array.length, _value;
-        for(var i = 0; i < len; i++){
-            if((_value = prop && prop(i) || array[i]) >= _max){
-                _i_max = i;
-                _max = _value;
-            }
-        }
-        return elementOrValue ? _max : _i_max;
-    }
-
-    function setVerticalAlign(arrElement, direction){
-        if(arrElement && TypeCheck.isArray(arrElement)){
-            direction = direction != "right";
-            var len = arrElement.length,
-                max = findMax(arrElement, function(i){
-                    return parseInt(arrElement[i].style.marginLeft) + (direction ? 0 : parseInt(arrElement[i].style.width));
-                }, true);
-            for(var i = 0; i < len; i++){
-                arrElement[i].style.marginLeft = max - (direction ? 0 : parseInt(arrElement[i].style.width)) + "px";
-            }
-        }
-    }
-
-    function setCenter(element){
-        var _style = element.style;
-        if(_style){
-            if(_style.position == "static"){
-                var _parent = element.parentNode || element.parentElement();
-                _style.margin = "auto";
-                _style.marginTop = (parseInt(_parent.style.height) - parseInt(_style.height))/2 + "px";
-            }
-            else{
-                var _width = parseInt(_style.width);
-                var _height = parseInt(_style.height);
-                _style.left = "50%";
-                _style.top = "50%";
-                _style.marginLeft = -_width/2 + "px";
-                _style.marginTop = -_height/2 + "px";
-            }
-        }
-    }
-
-    function setTextCenter(element){
-        if(element && element.nodeType == 1){
-//            console.log("element");
-            element.style.textAlign = "center";
-            element.style.lineHeight = element.style.height;
-        }
-    }
 
 
 
-    function bindEventHandler(){
 
-    }
+
 
     showDialog();
 

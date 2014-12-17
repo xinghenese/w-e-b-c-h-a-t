@@ -31,6 +31,7 @@ define(['../TypeCheck', 'DocumentFactory', 'TreeType', 'CSSUtil'], function(Type
 
     $.each = function(obj, fn, args){
         obj.each(fn, args);
+        return obj;
     };
 
     $.createPanel = function(obj, mapConversion){
@@ -71,72 +72,7 @@ define(['../TypeCheck', 'DocumentFactory', 'TreeType', 'CSSUtil'], function(Type
         return find(array, fn, -1)
     };
 
-    function borderBoxModel(element){
-
-    }
-
-    $.borderBox = function(element){
-        console.info(element);
-        console.info(Object.prototype.toString.call(element));
-        console.info(element.getMessureDigits("width"));
-        console.info(element.getMessureDigits("height"));
-        console.info(element.style.width);
-        console.info(element.style.height);
-        var direction = ["Top", "Right", "Bottom", "Left"],
-            messures = ["margin", "border", "padding"],
-            _size = [element.getMessureDigits("width"), element.getMessureDigits("height")];
-        console.info("origin_width: " + _size[0]);
-        console.info("origin_height: " + _size[1]);
-        for(var i = 0, ilen = direction.length; i < ilen; i++){
-            for(var j = 0, tmp = _size[$.isOdd(i)], jlen = messures.length; j < jlen; j++){
-                console.log("tmp: " + tmp);
-                console.log(messures[j] + direction[i] + ": " + element.getMessureDigits(messures[j] + direction[i]));
-                tmp -= element.getMessureDigits(messures[j] + direction[i]);
-            }
-            _size[$.isOdd(i)] = tmp;
-        }
-        console.info("_width: " + _size[0]);
-        console.info("_height: " + _size[1]);
-        element.style.width = _size[0] + "px";
-        element.style.height = _size[1] + "px";
-    };
-
-
-
     HTMLElement.implementMethods({
-        show: function(){
-            this.style.display = "block";
-        },
-        hide: function(){
-            this.style.display = "none";
-        },
-        borderBox: function(){
-            var direction = ["Top", "Right", "Bottom", "Left"],
-                messures = ["margin", "border", "padding"],
-                _size = [this.getMessureDigits("height"), this.getMessureDigits("width")];
-            console.info("origin_width: " + _size[1]);
-            console.info("origin_height: " + _size[0]);
-            for(var i = 0, ilen = direction.length; i < ilen; i++){
-                for(var j = 0, tmp = _size[$.isOdd(i)], jlen = messures.length; j < jlen; j++){
-                    tmp -= this.getMessureDigits(messures[j] + direction[i]);
-                    console.log(messures[j] + direction[i] + ": " + this.getMessureDigits(messures[j] + direction[i]));
-                    console.log("tmp: " + tmp);
-                }
-                _size[$.isOdd(i)] = tmp;
-            }
-            console.info("_width: " + _size[0]);
-            console.info("_height: " + _size[1]);
-            this.style.width = _size[0] + "px";
-            this.style.height = _size[1] + "px";
-        },
-        modifyStyle: function(fn, args){
-            if(TypeCheck.isFunction(fn)){
-                this.hide();
-//                this[fn]();
-                fn(args);
-                this.show();
-            }
-        },
         getParent: function(){
             return this.parentNode || this.parentElement();
         },
@@ -163,7 +99,7 @@ define(['../TypeCheck', 'DocumentFactory', 'TreeType', 'CSSUtil'], function(Type
         },
         getMessures: function(type){
             if(type = this.getStyle(type)){
-                var arr = type.match(/([\d\.]+)(\D*)$/);
+                var arr = type.match(/(\d+)\.*\d*(\D*)$/);
                 return {
                     digit: arr[1],
                     unit: arr[2]
@@ -172,24 +108,54 @@ define(['../TypeCheck', 'DocumentFactory', 'TreeType', 'CSSUtil'], function(Type
         },
         getMessureDigits: function(type){
             if(type = this.getStyle(type)){
-                return parseFloat(type);
+                return parseInt(type);
             }
             return 0;
         },
+        show: function(){
+            this.style.display = "block";
+        },
+        hide: function(){
+            this.style.display = "none";
+        },
+        borderBox: function(){
+            var direction = ["Top", "Right", "Bottom", "Left"],
+                messures = ["margin", "border", "padding"],
+                _size = [this.getMessureDigits("height"), this.getMessureDigits("width")];
+            console.info("origin_width: " + _size[1]);
+            console.info("origin_height: " + _size[0]);
+            for(var i = 0, ilen = direction.length; i < ilen; i++){
+                for(var j = 0, tmp = _size[$.isOdd(i)], jlen = messures.length; j < jlen; j++){
+                    tmp -= this.getMessureDigits(messures[j] + direction[i]);
+                    console.log(messures[j] + direction[i] + ": " + this.getMessureDigits(messures[j] + direction[i]));
+                    console.log("tmp: " + tmp);
+                }
+                _size[$.isOdd(i)] = tmp;
+            }
+            console.info("_height: " + _size[0]);
+            console.info("_width: " + _size[1]);
+            this.style.height = _size[0] + "px";
+            this.style.width = _size[1] + "px";
+        },
+        modifyStyle: function(fn, args){
+            if(TypeCheck.isFunction(fn)){
+                this.hide();
+//                this[fn]();
+                fn(args);
+                this.show();
+            }
+        },
         setCenter: function(){
-            var _style = this.style;
+            var _style = this.style, _parent = this.getParent();
             if(_style.position == "static"){
-                var _parent = this.getParent();
                 _style.margin = "auto";
-                _style.marginTop = (parseInt(_parent.style.height) - parseInt(_style.height))/2 + "px";
+                _style.marginTop = (_parent.getMessureDigits("width") - _parent.getMessureDigits("height"))/2 + "px";
             }
             else{
-                var _width = parseInt(_style.width);
-                var _height = parseInt(_style.height);
-                _style.left = "50%";
-                _style.top = "50%";
-                _style.marginLeft = -_width/2 + "px";
-                _style.marginTop = -_height/2 + "px";
+                _style.left = _parent.getMessureDigits("width")/2 + "px";
+                _style.top = _parent.getMessureDigits("height")/2 + "px";
+                _style.marginLeft = -parseInt(this.getMessureDigits("width"))/2 + "px";
+                _style.marginTop = -parseInt(this.getMessureDigits("height"))/2 + "px";
             }
             return this;
         },
@@ -197,7 +163,7 @@ define(['../TypeCheck', 'DocumentFactory', 'TreeType', 'CSSUtil'], function(Type
             if(TypeCheck.isHTMLElement(baseElement)){
                 direction = direction != "right";
                 if(direction){
-                    var margin = baseElement.style.marginLeft;
+                    var margin = baseElement.getMessureDigits("marginLeft");
                 }
                 else{
                     margin = baseElement.getMessureDigits("marginLeft") + baseElement.getMessureDigits("width") -
@@ -209,55 +175,64 @@ define(['../TypeCheck', 'DocumentFactory', 'TreeType', 'CSSUtil'], function(Type
         },
         setTextCenter: function(){
             this.style.textAlign = "center";
-            this.style.lineHeight = this.style.height;
+            this.style.lineHeight = this.getMessureDigits("height") + "px";
             return this;
         }
     });
 
     NodeList.implementMethods({
+        show: function(){
+            return this.each(function(){
+                this.show();
+            })
+        },
+        hide: function(){
+            return this.each(function(){
+                this.hide();
+            })
+        },
         setVerticalAlign: function(baseElement, direction){
+            console.info("NodeList.setVerticalAlign");
             var _self = this, len = _self.length;
-            if(TypeCheck.isHTMLElement(baseElement)){
-                _self.each(function(){
-                    this.setVerticalAlign(baseElement, direction);
-                });
-//                for(var i = 0; i < len; i ++){
-//                    _self[i].setVerticalAlign(baseElement, direction);
-//                }
-            }
-            else if(TypeCheck.isString(baseElement)){
+            if(TypeCheck.isString(baseElement)){
                 direction = baseElement;
-                if(direction != "right"){
-                    console.info("direction: " + direction);
-                    var ibase = $.findMin(_self, function(i){
+                if (direction != "right") {
+//                    console.info("direction: " + direction);
+                    var ibase = $.findMin(_self, function (i) {
 //                        console.info("marginLeft: " + _self[i].getMessureDigits("marginLeft"));
                         return _self[i].getMessureDigits("marginLeft");
                     });
                     console.info("ibase: " + ibase);
                 }
-                else{
-                    ibase = $.findMax(_self, function(i){
+                else {
+                    ibase = $.findMax(_self, function (i) {
                         return _self[i].getMessureDigits("marginLeft") + _self[i].getMessureDigits("width");
                     });
                 }
-                _self.each(function(){
-                    this.setVerticalAlign(_self[ibase], direction);
-                });
-//                for(i = 0; i < len; i ++){
-//                    _self[i].setVerticalAlign(_self[ibase], direction);
-//                }
+                baseElement = _self[ibase];
             }
-            return _self;
+            return _self.each(function(){
+                this.setVerticalAlign(baseElement, direction);
+            });
         },
         setTextCenter: function(){
-            this.each(function(){
+            return this.each(function(){
                 this.setTextCenter();
             });
-//            for(var i = 0, len = this.length; i < len; i ++){
-//                this[i].setTextCenter();
-//            }
+        },
+        borderBox: function(){
+            return this.each(function(){
+                this.borderBox();
+            });
+        },
+        float: function(){
+            return this.each(function(){
+                this.style.display = "inline-block";
+            });
         }
     });
+
+
 
     return $;
 });

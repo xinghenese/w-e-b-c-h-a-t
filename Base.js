@@ -55,6 +55,15 @@ define(['Page/TreeType', 'TypeCheck', 'CSSUtil'], function(TreeType, TypeCheck, 
         return this;
     };
 
+    Object.prototype.each = function(fn, args){
+        if(TypeCheck.likeArray(this)){
+            for(var i  = 0, len = this.length; i < len; i++){
+                fn.apply(this[i], args);
+            }
+        }
+        return this;
+    };
+
     Function.prototype.method = function (type, func) {
         if (!this.prototype[type]) {
             this.prototype[type] = func;
@@ -226,7 +235,9 @@ define(['Page/TreeType', 'TypeCheck', 'CSSUtil'], function(TreeType, TypeCheck, 
             }
         },
         copyAttributes: function(key, value){
-            this.setAttribute(key, (ClassMap[value] ? "" : value));
+            if(key !== "text"){
+                this.setAttribute(key, (ClassMap[value] ? "" : value));
+            }
         },
         createAndAppendChild: function(tag, tree, mapConversion){
             var arr = tag.split('-');

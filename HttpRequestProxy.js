@@ -2,16 +2,19 @@
  * Created by Administrator on 2014/12/4.
  */
 define(['Utils/CommonUtils', 'CoreSettings', 'Logger/Logger', 'Base'], function(CommonUtils, CoreSettings, Logger){
-    var PacketConfigAdapter = {
+    var packetConfigAdapter = {
         method: "POST",
         urlRoot: CoreSettings.getHttpRequestUrlRoot(),
         urlPath: "",
         requestData: "",
         needDecrypt: true,
-        timeout: CommonUtils.CONNECT_TIMEOUT
+        timeout: CommonUtils.CONNECT_TIMEOUT,
+        configHttpRequest: function(xhr){
+
+        }
     };
 
-    var PacketProcessorAdapter = {
+    var packetListenerAdapter = {
         callback: CommonUtils.FUNCTION_NOT_SET,
         onFailed: CommonUtils.FUNCTION_NOT_SET,
         onComplete: CommonUtils.FUNCTION_NOT_SET,
@@ -34,16 +37,13 @@ define(['Utils/CommonUtils', 'CoreSettings', 'Logger/Logger', 'Base'], function(
         },
         onTimeout: function(){
             Logger.error("Http", " http connection timeout");
-        },
-        configHttpRequest: function(xhr){
-
         }
     };
 
     var HttpProtocolPacketPrototype = {
         sendHttpRequest: function() {
             var _send, _self = this;
-            var xhr = new XMLHttpRequest();
+            var xhr = new XMLHttpRequest(); //early load. Remember to modify the code below.
             if (typeof xhr.timeout != "undefined") {
                 xhr = null;
                 _send = function () {
@@ -116,13 +116,13 @@ define(['Utils/CommonUtils', 'CoreSettings', 'Logger/Logger', 'Base'], function(
     };
 
     var HttpProtocolPacket = function(obj){
-        CommonUtils.COMMON_CONSTRUCTOR.call(this, obj, PacketConfigAdapter);
-        CommonUtils.COMMON_CONSTRUCTOR.call(this, obj, PacketProcessorAdapter);
+        CommonUtils.COMMON_CONSTRUCTOR.call(this, obj, packetConfigAdapter);
+        CommonUtils.COMMON_CONSTRUCTOR.call(this, obj, packetListenerAdapter);
     };
 
     HttpProtocolPacket.inherits(HttpProtocolPacketPrototype);
     HttpProtocolPacket.getAdapter = function(){
-        return PacketConfigAdapter;
+        return packetConfigAdapter;
     };
 
     return {
