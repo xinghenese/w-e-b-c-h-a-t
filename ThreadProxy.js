@@ -8,7 +8,9 @@ define(['Utils/CommonUtils', 'Logger/Logger'], function(CommonUtils, Logger){
         arguments:  CommonUtils.OBJECT_NOT_SET,
         task:       CommonUtils.STRING_NOT_SET,
         handler:    CommonUtils.FUNCTION_NOT_SET,
-        error:      CommonUtils.FUNCTION_NOT_SET
+        error:      function(evt){
+            Logger.error("Thread " + this.id, "worker.error: " + evt.message + "(" + evt.filename + ": " + evt.lineno + ")");
+        }
     };
 
     //Prototype: define methods which are shared by all instances and cannot overrides
@@ -22,6 +24,7 @@ define(['Utils/CommonUtils', 'Logger/Logger'], function(CommonUtils, Logger){
                 }
                 var worker = this.worker;
                 worker.onmessage = this.handler;
+                worker.onerror = this.error;
                 worker.postMessage({
                     arguments: JSON.stringify(this.arguments),
                     task: this.task

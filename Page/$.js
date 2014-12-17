@@ -75,6 +75,32 @@ define(['../TypeCheck', 'DocumentFactory', 'TreeType', 'CSSUtil'], function(Type
 
     }
 
+    $.borderBox = function(element){
+        console.info(element);
+        console.info(Object.prototype.toString.call(element));
+        console.info(element.getMessureDigits("width"));
+        console.info(element.getMessureDigits("height"));
+        console.info(element.style.width);
+        console.info(element.style.height);
+        var direction = ["Top", "Right", "Bottom", "Left"],
+            messures = ["margin", "border", "padding"],
+            _size = [element.getMessureDigits("width"), element.getMessureDigits("height")];
+        console.info("origin_width: " + _size[0]);
+        console.info("origin_height: " + _size[1]);
+        for(var i = 0, ilen = direction.length; i < ilen; i++){
+            for(var j = 0, tmp = _size[$.isOdd(i)], jlen = messures.length; j < jlen; j++){
+                console.log("tmp: " + tmp);
+                console.log(messures[j] + direction[i] + ": " + element.getMessureDigits(messures[j] + direction[i]));
+                tmp -= element.getMessureDigits(messures[j] + direction[i]);
+            }
+            _size[$.isOdd(i)] = tmp;
+        }
+        console.info("_width: " + _size[0]);
+        console.info("_height: " + _size[1]);
+        element.style.width = _size[0] + "px";
+        element.style.height = _size[1] + "px";
+    };
+
 
 
     HTMLElement.implementMethods({
@@ -87,19 +113,27 @@ define(['../TypeCheck', 'DocumentFactory', 'TreeType', 'CSSUtil'], function(Type
         borderBox: function(){
             var direction = ["Top", "Right", "Bottom", "Left"],
                 messures = ["margin", "border", "padding"],
-                _size = [this.getMessureDigits("width"), this.getMessureDigits("height")];
+                _size = [this.getMessureDigits("height"), this.getMessureDigits("width")];
+            console.info("origin_width: " + _size[1]);
+            console.info("origin_height: " + _size[0]);
             for(var i = 0, ilen = direction.length; i < ilen; i++){
-                for(var j = 0, jlen = messures.length; j < jlen; j++){
-                    _size[$.isOdd(i)] -= this.getMessureDigits(messures[j] + direction[i]);
+                for(var j = 0, tmp = _size[$.isOdd(i)], jlen = messures.length; j < jlen; j++){
+                    tmp -= this.getMessureDigits(messures[j] + direction[i]);
+                    console.log(messures[j] + direction[i] + ": " + this.getMessureDigits(messures[j] + direction[i]));
+                    console.log("tmp: " + tmp);
                 }
+                _size[$.isOdd(i)] = tmp;
             }
+            console.info("_width: " + _size[0]);
+            console.info("_height: " + _size[1]);
             this.style.width = _size[0] + "px";
             this.style.height = _size[1] + "px";
         },
-        modifyStyle: function(fn){
+        modifyStyle: function(fn, args){
             if(TypeCheck.isFunction(fn)){
                 this.hide();
-                fn();
+//                this[fn]();
+                fn(args);
                 this.show();
             }
         },
@@ -109,16 +143,19 @@ define(['../TypeCheck', 'DocumentFactory', 'TreeType', 'CSSUtil'], function(Type
         getStyle: function(type){
             if(window.getComputedStyle){
                 HTMLElement.prototype.getStyle = function(type){
+//                    console.info("ComputedStyle: " + type);
                     return window.getComputedStyle(this, null).getPropertyValue(CSSUtil.cssFormat(type));
                 };
             }
             else if(this.currentStyle){
                 HTMLElement.prototype.getStyle = function(type){
+//                    console.info("CurrentStyle: " + type);
                     return this.currentStyle[type];
                 };
             }
             else {
                 HTMLElement.prototype.getStyle = function(type){
+//                    console.info("Style: " + type);
                     return this.style[type];
                 }
             }

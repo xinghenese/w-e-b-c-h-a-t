@@ -630,9 +630,14 @@ require(['DocumentFactory', 'TreeType', '$', '../TypeCheck'], function(DocumentF
 
         });
 
+        var a = $('#search', view);
+        console.log("width: " + a.getMessureDigits("width"));
+        console.log("height: " + a.getMessureDigits("height"));
+        $.borderBox(a);
+//        a.modifyStyle($.borderBox, a);
 //        $('#search', view).modifyStyle(function(){
 ////            this.borderBox();
-//            this.style.width = "200px";
+////            this.style.width = "200px";
 //        });
 //        $('#search_button', view).modifyStyle(function(){
 //            this.borderBox();
