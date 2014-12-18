@@ -12,17 +12,7 @@ define(function(){
 
     var arrType = ["Undefined", "Number", "String", "Object", "Function", "Array", "XMLDocument", "Element", "HTMLDocument", "HTML-Element", "NodeList"];
 
-    var TypeCheck = {
-//        isNumber: function(num){
-//            return num === +num && isFinite(num);
-//        },
-        likeNumber: function(num){
-            return num == +num;
-        },
-        likeArray: function(list){
-            return typeof list.length == "number";
-        }
-    };
+    var TypeCheck = {};
 
     for(var i = 0, len = arrType.length; i < len; i++){
         var _type = arrType[i].split('-'), tmp = _type[1] || "";
