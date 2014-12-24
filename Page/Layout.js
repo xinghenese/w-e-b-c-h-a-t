@@ -1,7 +1,7 @@
 /**
  * Created by Administrator on 2014/12/17.
  */
-define(['../Base', '../TypeCheck', 'CSSUtil', '$'], function(Base, TypeCheck, CSSUtil, $){
+define(['Base', 'TypeCheck', 'CSSUtil', '$'], function(Base, TypeCheck, CSSUtil, $){
     HTMLElement.implementMethods({
         getParent: function(){
             return this.parentNode || this.parentElement();

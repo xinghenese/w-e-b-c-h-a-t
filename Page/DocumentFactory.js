@@ -1,7 +1,7 @@
 /**
  * Created by Administrator on 2014/12/3.
  */
-define(['../Base', 'TreeType'], function(Base, TreeType){
+define(['Base', 'TreeType'], function(Base, TreeType){
     var DocumentFactory = {
         createDocument: function(root){
             if (window.ActiveXObject){
@@ -76,8 +76,8 @@ define(['../Base', 'TreeType'], function(Base, TreeType){
                     _sourceNode = _rootInfo[0].getSubNodeByKey(_sourceNodeKey); //key is used to search a node
                     var _targetNodeName = _sourceNode.tagName || _sourceNodeKey;    //name is used to create a node
                     _targetNode = _targetRootsInfo[_length - 1].createAndAppendChild(_targetNodeName, _resultTree, mapConversion);
-                    _sourceNode.parseAttributes(_targetNode, mapConversion);
                     var _sourceNodeInfo = _sourceNode.checkSubNodes();  //check whether the sourceNode is a subRoot.
+                    _sourceNode.parseAttributes(_targetNode, mapConversion);
                     if(_sourceNodeInfo){
                         _sourceRootsInfo.push(_sourceNodeInfo);
                         _targetRootsInfo.push(_targetNode);
@@ -114,9 +114,9 @@ define(['../Base', 'TreeType'], function(Base, TreeType){
                 _targetRoot = _resultTree.getRoot();
                 _targetNode = _targetRoot;
 
-                _sourceNode.parseAttributes(_targetNode, mapConversion);
-
                 var _sourceNodeInfo = _sourceNode.checkSubNodes();
+
+                _sourceNode.parseAttributes(_targetNode, mapConversion);
                 if(_sourceNodeInfo){
                     _sourceRootsInfo.push(_sourceNodeInfo);
                     _targetRootsInfo.push(_targetNode);

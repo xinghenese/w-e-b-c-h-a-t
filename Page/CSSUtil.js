@@ -1,7 +1,7 @@
 /**
  * Created by Administrator on 2014/12/15.
  */
-define(['../TypeCheck'], function(TypeCheck){
+define(['TypeCheck'], function(TypeCheck){
     return {
         cssFormat: function(input){
             return input.replace(/([A-Z])/g, function(){
@@ -20,9 +20,10 @@ define(['../TypeCheck'], function(TypeCheck){
             var result = "";
             for(var key in obj){
                 if(obj.hasOwnProperty(key)){
-                    result += key + ":" + this.cssFormat(obj[key]) + ";";
+                    result += this.cssFormat(key) + ":" + obj[key] + ";";
                 }
             }
+            return result;
         }
     };
 });

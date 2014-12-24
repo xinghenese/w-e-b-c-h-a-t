@@ -1,7 +1,67 @@
 /**
+ * Created by Administrator on 2014/12/24.
+ */
+define('TypeCheck',[],function(){
+    var toString = {}.toString;
+    return {
+        isExist: function(variable){
+            if(typeof variable == "undefined"){
+                try{
+                    if(variable == null){
+                        return "not set";
+                    }
+                }
+                catch(err){
+                    return "not defined";
+                }
+            }
+            else{
+                return "set";
+            }
+// return typeof variable == "undefined";
+        },
+        isNumber: function(num){
+            return num === +num && isFinite(num);
+        },
+        likeNumber: function(num){
+            return num == +num;
+        },
+        isString: function(str){
+            return typeof str == "string";
+        },
+        isFunction: function(fn){
+            return typeof fn == "function";
+        },
+        isObject: function(obj){
+            return toString.call(obj) == "[object Object]";
+        },
+        isArray: function(arr){
+            return toString.call(arr) == "[object Array]";
+        },
+        likeArray: function(list){
+            return typeof list.length == "number";
+        },
+        isXMLDocument: function(xml){
+            return toString.call(xml) == "[object XMLDocument]";
+        },
+        isXMLElement: function(element){
+            return toString.call(element) == "[object Element]";
+        },
+        isHTMLDocument: function(doc){
+            return toString.call(doc) == "[object HTMLDocument]";
+        },
+        isHTMLElement: function(element){
+            return toString.call(element).search(/^\[object HTML.*Element\]$/) != -1;
+        },
+        isNodeList: function(nodeList){
+            return toString.call(nodeList) == "[object NodeList]";
+        }
+    }
+});
+/**
  * Created by Administrator on 2014/12/15.
  */
-define('TreeType', function(){
+define('TreeType',[],function(){
     return{
         Object: 1,
         Wrapper: 2,
@@ -9,8 +69,10 @@ define('TreeType', function(){
         HTMLDocument: 4
     };
 });
-
-define('CSSUtil', function(){
+/**
+ * Created by Administrator on 2014/12/15.
+ */
+define('CSSUtil',['TypeCheck'], function(TypeCheck){
     return {
         cssFormat: function(input){
             return input.replace(/([A-Z])/g, function(){
@@ -20,6 +82,11 @@ define('CSSUtil', function(){
                 }
             });
         },
+        classify: function(obj){
+            if(TypeCheck.isObject(obj)){
+
+            }
+        },
         toCSSText: function(obj){
             var result = "";
             for(var key in obj){
@@ -27,21 +94,21 @@ define('CSSUtil', function(){
                     result += this.cssFormat(key) + ":" + obj[key] + ";";
                 }
             }
+            console.info("result: " + result);
             return result;
         }
     };
 });
-
 /**
  * Created by Administrator on 2014/12/3.
  */
-define('Base', ['TreeType', 'CSSUtil'], function(TreeType, CSSUtil){
+define('Base',['TreeType', 'TypeCheck', 'CSSUtil'], function(TreeType, TypeCheck, CSSUtil){
 
     Object.prototype.basicClone = function () {
         var _copy = new this.constructor;
         for (var prop in this) {
             if (this.hasOwnProperty(prop)) {
-                if (typeof(this[prop]) != "function") {
+                if(!TypeCheck.isFunction(this[prop])){
                     _copy[prop] = this[prop];
                 }
             }
@@ -68,13 +135,13 @@ define('Base', ['TreeType', 'CSSUtil'], function(TreeType, CSSUtil){
     Object.prototype.clearProperties = function () {
         for (var prop in this) {
             if (this.hasOwnProperty(prop)) {
-                if (typeof(this[prop]) == "function") {
+                if(TypeCheck.isFunction(this[prop])) {
                     this[prop] = null;
                 }
-                else if (typeof(this[prop]) != "object") {
+                else if(!TypeCheck.isObject(this[prop])) {
                     delete prop;
                 }
-                else {
+                else{
                     this[prop].clearProperties();
                 }
             }
@@ -83,8 +150,17 @@ define('Base', ['TreeType', 'CSSUtil'], function(TreeType, CSSUtil){
 
     Object.prototype.superMethod = function(name, args){
         var func = (this.constructor.getAdapter())[name] || (this.constructor.prototype)[name];
-        if(typeof func === 'function'){
+        if(TypeCheck.isFunction(func)){
             func.apply(this, args);
+        }
+        return this;
+    };
+
+    Object.prototype.each = function(fn, args){
+        if(TypeCheck.likeArray(this)){
+            for(var i  = 0, len = this.length; i < len; i++){
+                fn.apply(this[i], args);
+            }
         }
         return this;
     };
@@ -102,18 +178,18 @@ define('Base', ['TreeType', 'CSSUtil'], function(TreeType, CSSUtil){
 
     Function.prototype.implementMethods = function (funcObj) {
         for (var key in funcObj) {
-            if (funcObj.hasOwnProperty(key) && typeof funcObj[key] == "function") {
+            if (funcObj.hasOwnProperty(key) && TypeCheck.isFunction(funcObj[key])) {
                 this.prototype[key] = funcObj[key];
             }
         }
     };
 
     Function.prototype.inherits = function (protoObj, fConstructor) {
-        if(typeof protoObj == "object"){
+        if(TypeCheck.isObject(protoObj)){
             this.prototype = protoObj;
             this.prototype.constructor = fConstructor || this;
         }
-        else if(typeof protoObj == "function"){
+        else if(TypeCheck.isFunction(protoObj)){
             this.prototype = new protoObj();
             this.prototype.constructor = fConstructor || protoObj || this;
         }
@@ -127,17 +203,19 @@ define('Base', ['TreeType', 'CSSUtil'], function(TreeType, CSSUtil){
         return this;
     };
 
-//    Interface Tree{
-//        getTreeType();
-//        getRoot();
-//    }
-//    Interface Node{
-//        checkSubNodes();
-//        getSubNodeByKey(key);
-//        parseAttributes(targetNode, mapConversion);
-//        copyAttributes(key, value);
-//        createAndAppendChild(tag, tree, mapConversion);
-//      }
+    /*
+         Interface Tree{
+             getTreeType();
+             getRoot();
+         }
+         Interface Node{
+             checkSubNodes();
+             getSubNodeByKey(key);
+             parseAttributes(targetNode, mapConversion);
+             copyAttributes(key, value);
+             createAndAppendChild(tag, tree, mapConversion);
+         }
+     */
 
     Object.implementMethods({
         getTreeType: function(){
@@ -156,18 +234,18 @@ define('Base', ['TreeType', 'CSSUtil'], function(TreeType, CSSUtil){
             for(var key in _self){
                 if(_self.hasOwnProperty(key)){
                     if(_self[key]){
-                        if(Object.prototype.toString.call(_self[key]) == "[object Array]"){
+                        if(TypeCheck.isArray(_self[key])){
                             var _len = _self[key].length;
                             for(var i = 0; i < _len; i++){
                                 _subNodeKeys.push(key + "-" + i);
                             }
-//                            console.log("checkSubNodes: " + _subNodeKeys);
                             _hasChild = true;
                         }
-                        else if(typeof(_self[key]) == "object"){
+                        else if(TypeCheck.isObject(_self[key])){
                             if(key == "style"){
-//                                console.log(_self[key]);
+                                console.info("style: ");
                                 _self[key] = CSSUtil.toCSSText(_self[key]);
+                                console.info(_self[key]);
                             }
                             else{
                                 _subNodeKeys.push(key);
@@ -185,14 +263,10 @@ define('Base', ['TreeType', 'CSSUtil'], function(TreeType, CSSUtil){
         },
         getSubNodeByKey: function(key){
             //key = (mapConversion && mapConversion[key]) || key;
-//            console.log("key: " + key);
-//            console.log("getSubNodeByKey: " + this[key]);
             var _info = key.split('-'),
                 _key = _info[0],
                 _index = _info[1];
-//            console.log("_key: " + _key + "\t _index: " + _index);
-            if(_index == +_index){
-//                console.log("this[" + _key + "][" + _index+ "]: " + this[_key][_index]);
+            if(TypeCheck.likeNumber(_index)){
                 return this[_key][_index];
             }
             return this[_key];
@@ -202,22 +276,19 @@ define('Base', ['TreeType', 'CSSUtil'], function(TreeType, CSSUtil){
             for(var key in _self){
                 if(_self.hasOwnProperty(key)){
                     var _value = _self[key];
-                    if(typeof(_value) != "function" && typeof(_value) != "object"){
+                    if(!TypeCheck.isFunction(_value) && !TypeCheck.isObject(_value) && !TypeCheck.isArray(_value)){
                         key = (mapConversion && mapConversion[key]) || key;
-//                        console.log("key: " + key);
                         targetNode.copyAttributes(key, _value);
                     }
                 }
             }
         },
         copyAttributes: function(key, value){
-//            this[key] = ClassMap[value] ? {} : value;
             this[key] = value;
         },
         createAndAppendChild: function(tag, tree, mapConversion){
             var _self = this;
             tag = (mapConversion && mapConversion[tag]) || tag;
-//        console.log("tag: " + tag);
             _self[tag] = {};
             return _self[tag];
         }
@@ -225,17 +296,15 @@ define('Base', ['TreeType', 'CSSUtil'], function(TreeType, CSSUtil){
 
     Document.implementMethods({
         getTreeType: function(){
-//            console.log("XMLDocument");
             return TreeType.XMLDocument;
         },
-        getRoot: function(root){
+        getRoot: function(){
             return this.documentElement;
         }
     });
 
     HTMLDocument.implementMethods({
         getTreeType: function(){
-//            console.log("HTMLDocument");
             return TreeType.HTMLDocument;
         },
         getRoot: function(){
@@ -264,26 +333,40 @@ define('Base', ['TreeType', 'CSSUtil'], function(TreeType, CSSUtil){
                 var _attrs = this.attributes, i = 0;
                 do{
                     var _key = (mapConversion && mapConversion[_attrs[i].name]) || _attrs[i].name;
-//                console.log("_key: " + _key);
                     targetNode.copyAttributes(_key, _attrs[i].value);
                 }while(typeof(_attrs[++i]) != "undefined");
             }
         },
         copyAttributes: function(key, value){
-//            this.setAttribute(key, (ClassMap[value] ? "" : value));
             if(key !== "text"){
                 this.setAttribute(key, value);
             }
         },
         createAndAppendChild: function(tag, tree, mapConversion){
-            tag = (mapConversion && mapConversion[tag.split('-')[0]]) || tag.split('-')[0];
+            var arr = tag.split('-');
+            tag = (mapConversion && mapConversion[arr[0]]) || arr[0];
             return this.appendChild(tree.createElement(tag));
         }
     });
 
     HTMLElement.implementMethods({
+        getSubNodeByKey: function(key){
+            //key = (mapConversion && mapConversion[key]) || key;
+            console.info("subRoot_id: " + this.id);
+            if(key != "text"){
+                var _info = key.split('-'),
+                    _key = _info[0],
+                    _index = _info[1];
+                console.info("_key: " + _key);
+                console.info("_index: " + _index);
+                if(!_key && typeof _index !== "undefined"){
+                    console.info("(key, value):  (" + key + ", " + this[_key][_index] + ")");
+                    return this[_key][_index];
+                }
+            }
+            return this[_key];
+        },
         createAndAppendChild: function(tag, tree, mapConversion){
-//            console.log("createAndAppendChild: tag: " + tag);
             var arr = tag.split('-');
             tag = (mapConversion && mapConversion[arr[0]]) || arr[0];
             if(tag == "text"){
@@ -298,11 +381,10 @@ define('Base', ['TreeType', 'CSSUtil'], function(TreeType, CSSUtil){
     };
 
 });
-
 /**
  * Created by Administrator on 2014/12/3.
  */
-define('DocumentFactory', ['Base', 'TreeType'], function(Base, TreeType){
+define('DocumentFactory',['Base', 'TreeType'], function(Base, TreeType){
     var DocumentFactory = {
         createDocument: function(root){
             if (window.ActiveXObject){
@@ -363,40 +445,40 @@ define('DocumentFactory', ['Base', 'TreeType'], function(Base, TreeType){
         },
 
         parseTree: function(sourceTree, toType, mapConversion){    //initRoot: get the rootNode of the document
-            var _sourceNode, _sourceRoot, _sourceRootsInfo = [], _len = 0;
+            var _sourceNode, _sourceRoot, _sourceRootsInfo = [], _length = 0;
             var _targetNode, _targetRoot, _targetRootsInfo = [], _resultTree;
             //check
             if(!sourceTree.getTreeType || !sourceTree.getTreeType() || sourceTree.getTreeType() == toType){
-//                console.log("check");
+                console.log("check");
                 return sourceTree;
             }
-            while(_len > 0 || _initializing()){
-                var _rootInfo = _sourceRootsInfo[_len - 1];
+            while(_length > 0 || _initializing()){
+                var _rootInfo = _sourceRootsInfo[_length - 1];
                 var _sourceNodeKey = _rootInfo[1];
                 if(typeof(_sourceNodeKey) != "undefined"){
                     _sourceNode = _rootInfo[0].getSubNodeByKey(_sourceNodeKey); //key is used to search a node
                     var _targetNodeName = _sourceNode.tagName || _sourceNodeKey;    //name is used to create a node
-                    _targetNode = _targetRootsInfo[_len - 1].createAndAppendChild(_targetNodeName, _resultTree, mapConversion);
+                    _targetNode = _targetRootsInfo[_length - 1].createAndAppendChild(_targetNodeName, _resultTree, mapConversion);
                     var _sourceNodeInfo = _sourceNode.checkSubNodes();  //check whether the sourceNode is a subRoot.
                     _sourceNode.parseAttributes(_targetNode, mapConversion);
                     if(_sourceNodeInfo){
                         _sourceRootsInfo.push(_sourceNodeInfo);
                         _targetRootsInfo.push(_targetNode);
-                        _len ++;
+                        _length ++;
                         _targetNode = _targetNode.getSubNodeByKey(_targetNodeName);//getSubObjectByNodeName(_targetNode, _sourceNode.getName());
                     }
                     else{
-                        _rootInfo.splice(1, 1);
+                        _rootInfo.splice(1, 1);//_rootInfo: [_slef, key1, key2, key3...]
                     }
                 }
                 else{
                     _sourceRootsInfo.pop();
                     _targetRootsInfo.pop();
-                    _len --;
-                    if(_len > 0){
-                        _rootInfo = _sourceRootsInfo[_len - 1];
+                    _length --;
+                    if(_length > 0){
+                        _rootInfo = _sourceRootsInfo[_length - 1];
                         _rootInfo.splice(1, 1);
-                        _targetNode = _targetRootsInfo[_len - 1];
+                        _targetNode = _targetRootsInfo[_length - 1];
                     }
                 }
             }
@@ -413,18 +495,16 @@ define('DocumentFactory', ['Base', 'TreeType'], function(Base, TreeType){
 
                 _resultTree = _createEmptyTree(_sourceRoot, toType, mapConversion);
                 _targetRoot = _resultTree.getRoot();
-//                console.info(_targetRoot);
                 _targetNode = _targetRoot;
 
                 var _sourceNodeInfo = _sourceNode.checkSubNodes();
+
                 _sourceNode.parseAttributes(_targetNode, mapConversion);
-//                console.log("id: " + _targetNode.getAttribute("id"));
-//                console.info(_targetRoot);
 
                 if(_sourceNodeInfo){
                     _sourceRootsInfo.push(_sourceNodeInfo);
                     _targetRootsInfo.push(_targetNode);
-                    _len ++;
+                    _length ++;
                     _initializing = function(){return false;};
                     return true;
                 }
@@ -437,10 +517,8 @@ define('DocumentFactory', ['Base', 'TreeType'], function(Base, TreeType){
 //                console.log("ClassMap[_name]: " + ClassMap[_name]);
                 switch(toType){
                     case TreeType.XMLDocument:
-//                        console.info("XMLDocument");
                         return DocumentFactory.createDocument(_name);
                     case TreeType.HTMLDocument:
-//                        console.info("HTMLDocument");
                         return document;
 //                    case TypeMap.Wrapper:
 //                        return (ClassMap[_name] && ClassMap[_name].createInstance()) || {};
@@ -452,8 +530,247 @@ define('DocumentFactory', ['Base', 'TreeType'], function(Base, TreeType){
     };
     return DocumentFactory;
 });
+/**
+ * Created by Administrator on 2014/12/15.
+ */
+define('$',['TypeCheck', 'DocumentFactory', 'TreeType', 'CSSUtil'], function(TypeCheck, DocumentFactory, TreeType, CSSUtil){
+    var slice = [].slice, concat = [].concat;
+
+    Object.prototype.each = function(fn, args){
+        if(TypeCheck.likeArray(this)){
+            for(var i  = 0, len = this.length; i < len; i++){
+                fn.apply(this[i], args);
+            }
+        }
+        return this;
+    };
+
+    var $ = function(selector, context, count){
+        context = context && context.nodeType == 1 && context || document;
+        var nodeList = context.querySelectorAll(selector);
+        if(nodeList.length > 1){
+            return nodeList;
+        }
+        else if(nodeList.length == 1){
+            return nodeList[0];
+        }
+        return null;
+    };
+
+    $.isOdd = function(num){
+        return num & 1;
+    };
+
+    $.each = function(obj, fn, args){
+        obj.each(fn, args);
+        return obj;
+    };
+
+    $.createPanel = function(obj, mapConversion){
+        if(TypeCheck.isObject(obj)){
+            return DocumentFactory.parseTree(obj, TreeType.HTMLDocument, mapConversion);
+        }
+    };
+
+    $.merge = function(){
+        for(var i = 0, len = arguments.length, arr = []; i < len; i++){
+            if(TypeCheck.likeArray(arguments[i])) {
+                concat.call(arr, slice.call(arguments[i]));
+            }
+        }
+        return arr;
+    };
+
+    var find = function(array, fn, compare){
+        if(compare != -1){
+            compare = 1;
+        }
+        if(TypeCheck.likeArray(array)){
+            for(var i = 0, len = array.length, base = 0, ibase = 0, tmp; i < len; i++){
+                if((tmp = fn && fn(i) * compare) >= base || (tmp = array[i] * compare) >= base){
+                    base = tmp;
+                    ibase = i;
+                }
+            }
+        }
+        return ibase;
+    };
+
+    $.findMax = function(array, fn){
+        return find(array, fn, 1)
+    };
+
+    $.findMin = function(array, fn){
+        return find(array, fn, -1)
+    };
+
+    HTMLElement.implementMethods({
+        getParent: function(){
+            return this.parentNode || this.parentElement();
+        },
+        getStyle: function(type){
+            if(window.getComputedStyle){
+                HTMLElement.prototype.getStyle = function(type){
+//                    console.info("ComputedStyle: " + type);
+                    return window.getComputedStyle(this, null).getPropertyValue(CSSUtil.cssFormat(type));
+                };
+            }
+            else if(this.currentStyle){
+                HTMLElement.prototype.getStyle = function(type){
+//                    console.info("CurrentStyle: " + type);
+                    return this.currentStyle[type];
+                };
+            }
+            else {
+                HTMLElement.prototype.getStyle = function(type){
+//                    console.info("Style: " + type);
+                    return this.style[type];
+                }
+            }
+            return this.getStyle(type);
+        },
+        getMessures: function(type){
+            if(type = this.getStyle(type)){
+                var arr = type.match(/(\d+)\.*\d*(\D*)$/);
+                return {
+                    digit: arr[1],
+                    unit: arr[2]
+                }
+            }
+        },
+        getMessureDigits: function(type){
+            if(type = this.getStyle(type)){
+                return parseInt(type);
+            }
+            return 0;
+        },
+        show: function(){
+            this.style.display = "block";
+        },
+        hide: function(){
+            this.style.display = "none";
+        },
+        borderBox: function(){
+            var direction = ["Top", "Right", "Bottom", "Left"],
+                messures = ["margin", "border", "padding"],
+                _size = [this.getMessureDigits("height"), this.getMessureDigits("width")];
+            console.info("origin_width: " + _size[1]);
+            console.info("origin_height: " + _size[0]);
+            for(var i = 0, ilen = direction.length; i < ilen; i++){
+                for(var j = 0, tmp = _size[$.isOdd(i)], jlen = messures.length; j < jlen; j++){
+                    tmp -= this.getMessureDigits(messures[j] + direction[i]);
+                    console.log(messures[j] + direction[i] + ": " + this.getMessureDigits(messures[j] + direction[i]));
+                    console.log("tmp: " + tmp);
+                }
+                _size[$.isOdd(i)] = tmp;
+            }
+            console.info("_height: " + _size[0]);
+            console.info("_width: " + _size[1]);
+            this.style.height = _size[0] + "px";
+            this.style.width = _size[1] + "px";
+        },
+        modifyStyle: function(fn, args){
+            if(TypeCheck.isFunction(fn)){
+                this.hide();
+//                this[fn]();
+                fn(args);
+                this.show();
+            }
+        },
+        setCenter: function(){
+            var _style = this.style, _parent = this.getParent();
+            if(_style.position == "static"){
+                _style.margin = "auto";
+                _style.marginTop = (_parent.getMessureDigits("width") - _parent.getMessureDigits("height"))/2 + "px";
+            }
+            else{
+                _style.left = _parent.getMessureDigits("width")/2 + "px";
+                _style.top = _parent.getMessureDigits("height")/2 + "px";
+                _style.marginLeft = -parseInt(this.getMessureDigits("width"))/2 + "px";
+                _style.marginTop = -parseInt(this.getMessureDigits("height"))/2 + "px";
+            }
+            return this;
+        },
+        setVerticalAlign: function(baseElement, direction){
+            if(TypeCheck.isHTMLElement(baseElement)){
+                direction = direction != "right";
+                if(direction){
+                    var margin = baseElement.getMessureDigits("marginLeft");
+                }
+                else{
+                    margin = baseElement.getMessureDigits("marginLeft") + baseElement.getMessureDigits("width") -
+                        (margin = this.getMessures("width")).digit + margin.unit;
+                }
+                this.style.marginLeft = margin;
+            }
+            return this;
+        },
+        setTextCenter: function(){
+            this.style.textAlign = "center";
+            this.style.lineHeight = this.getMessureDigits("height") + "px";
+            return this;
+        }
+    });
+
+    NodeList.implementMethods({
+        show: function(){
+            return this.each(function(){
+                this.show();
+            })
+        },
+        hide: function(){
+            return this.each(function(){
+                this.hide();
+            })
+        },
+        setVerticalAlign: function(baseElement, direction){
+            console.info("NodeList.setVerticalAlign");
+            var _self = this, len = _self.length;
+            if(TypeCheck.isString(baseElement)){
+                direction = baseElement;
+                if (direction != "right") {
+//                    console.info("direction: " + direction);
+                    var ibase = $.findMin(_self, function (i) {
+//                        console.info("marginLeft: " + _self[i].getMessureDigits("marginLeft"));
+                        return _self[i].getMessureDigits("marginLeft");
+                    });
+                    console.info("ibase: " + ibase);
+                }
+                else {
+                    ibase = $.findMax(_self, function (i) {
+                        return _self[i].getMessureDigits("marginLeft") + _self[i].getMessureDigits("width");
+                    });
+                }
+                baseElement = _self[ibase];
+            }
+            return _self.each(function(){
+                this.setVerticalAlign(baseElement, direction);
+            });
+        },
+        setTextCenter: function(){
+            return this.each(function(){
+                this.setTextCenter();
+            });
+        },
+        borderBox: function(){
+            return this.each(function(){
+                this.borderBox();
+            });
+        },
+        float: function(){
+            return this.each(function(){
+                this.style.display = "inline-block";
+            });
+        }
+    });
 
 
+
+    return $;
+});
+/**
+ * Created by Administrator on 2014/12/24.
+ */
 require(['$'], function($){
     var dialog, userlist;
     function showDialog(msg){
@@ -476,48 +793,48 @@ require(['$'], function($){
                 backgroundColor: "#FFFFFF"
             },
             div: [{
-                    id: "box_title",
-                    text: "意见反馈",
-                    style: {
-                        width: "100%",
-                        height: "52px",
-                        backgroundColor: "#F8F8F4",
-                        font: "14px 宋体"
-                    }
-                },{
-                    id: "box_content",
-                    style: {
-                        width: "422px",
-                        height: "125px",
-                        margin: "16px 20px 0",
-                        backgroundColor: "#F8F8F7"
-                    }
-                },{
-                    id: "btnSend",
-                    text: "发送",
-                    style: {
-                        width: "82px",
-                        height: "30px",
-                        marginTop: "10px",
-                        backgroundColor: "#21b69d",
-                        color: "#FFFFFF",
-                        font: "14px 宋体",
-                        cursor: "pointer"
-                    }
-                }, {
-                    id: "btnClose",
-                    text: "\u00D7",
-                    style: {
-                        width: "52px",
-                        height: "52px",
-                        position: "absolute",
-                        top: "0",
-                        right: "0",
-                        color: "#181818",
-                        font: "40px 宋体",
-                        cursor: "pointer"
-                    }
-                }]
+                id: "box_title",
+                text: "意见反馈",
+                style: {
+                    width: "100%",
+                    height: "52px",
+                    backgroundColor: "#F8F8F4",
+                    font: "14px 宋体"
+                }
+            },{
+                id: "box_content",
+                style: {
+                    width: "422px",
+                    height: "125px",
+                    margin: "16px 20px 0",
+                    backgroundColor: "#F8F8F7"
+                }
+            },{
+                id: "btnSend",
+                text: "发送",
+                style: {
+                    width: "82px",
+                    height: "30px",
+                    marginTop: "10px",
+                    backgroundColor: "#21b69d",
+                    color: "#FFFFFF",
+                    font: "14px 宋体",
+                    cursor: "pointer"
+                }
+            }, {
+                id: "btnClose",
+                text: "\u00D7",
+                style: {
+                    width: "52px",
+                    height: "52px",
+                    position: "absolute",
+                    top: "0",
+                    right: "0",
+                    color: "#181818",
+                    font: "40px 宋体",
+                    cursor: "pointer"
+                }
+            }]
         });
 
         box.setCenter();
@@ -592,7 +909,7 @@ require(['$'], function($){
                     font: "14px 宋体",
                     lineHeight: "14px"
                 }
-           }, {
+            }, {
                 id: "select",
                 text: "\u2714",
                 style: {
@@ -643,30 +960,30 @@ require(['$'], function($){
 //                        color: "#bfc4b9"
 //                    }
 //                },
-    {
-                    id: "search_button",
-                    text: "s",
-                    style: {
-                        width: "39px",
-                        height: "100%",
+                    {
+                        id: "search_button",
+                        text: "s",
+                        style: {
+                            width: "39px",
+                            height: "100%",
 //                        position: "relative",
 //                        top: "-100%",
 //                        left: "219px",
-                        marginRight: "1px",
-                        backgroundColor: "#FAFFF4",
-                        color: "#bfc4b9"
-                    }
-                }, {
-                    id: "search_button2",
-                    text: "sa",
-                    style: {
-                        width: "39px",
-                        height: "100%",
-                        marginRight: "1px",
-                        backgroundColor: "#FAFFF4",
-                        color: "#bfc4b9"
-                    }
-                }]
+                            marginRight: "1px",
+                            backgroundColor: "#FAFFF4",
+                            color: "#bfc4b9"
+                        }
+                    }, {
+                        id: "search_button2",
+                        text: "sa",
+                        style: {
+                            width: "39px",
+                            height: "100%",
+                            marginRight: "1px",
+                            backgroundColor: "#FAFFF4",
+                            color: "#bfc4b9"
+                        }
+                    }]
             }]
         });
 
@@ -700,3 +1017,5 @@ require(['$'], function($){
 
 //    createBox();
 });
+define("main", function(){});
+

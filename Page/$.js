@@ -1,7 +1,7 @@
 /**
  * Created by Administrator on 2014/12/15.
  */
-define(['../TypeCheck', 'DocumentFactory', 'TreeType', 'CSSUtil'], function(TypeCheck, DocumentFactory, TreeType, CSSUtil){
+define(['TypeCheck', 'DocumentFactory', 'TreeType', 'CSSUtil'], function(TypeCheck, DocumentFactory, TreeType, CSSUtil){
     var slice = [].slice, concat = [].concat;
 
     Object.prototype.each = function(fn, args){

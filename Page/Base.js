@@ -1,7 +1,7 @@
 /**
  * Created by Administrator on 2014/12/3.
  */
-define(['Page/TreeType', 'Page/TypeCheck', 'Page/CSSUtil'], function(TreeType, TypeCheck, CSSUtil){
+define(['TreeType', 'TypeCheck', 'CSSUtil'], function(TreeType, TypeCheck, CSSUtil){
 
     Object.prototype.basicClone = function () {
         var _copy = new this.constructor;
@@ -173,7 +173,7 @@ define(['Page/TreeType', 'Page/TypeCheck', 'Page/CSSUtil'], function(TreeType, T
             for(var key in _self){
                 if(_self.hasOwnProperty(key)){
                     var _value = _self[key];
-                    if(!TypeCheck.isFunction(_value) && !TypeCheck.isObject(_value) && !TypeCheck.isArray(_value)){
+                    if(!TypeCheck.isFunction(_value) && !TypeCheck.isObject(_value)){
                         key = (mapConversion && mapConversion[key]) || key;
                         targetNode.copyAttributes(key, _value);
                     }

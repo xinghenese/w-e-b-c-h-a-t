@@ -1,7 +1,7 @@
 /**
  * Created by Administrator on 2014/11/25.
  */
-define(['Base'], function(Base){
+define(function(){
     var Coder = (function () {
 //        var parse16 = "0123456789ABCDEF";
         var base64EncodeChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
@@ -86,9 +86,9 @@ define(['Base'], function(Base){
                     var a1 = ((base64DecodeChars[input.charCodeAt(i)] & 0x003F) << 2) ^ (base64DecodeChars[input.charCodeAt(i + 1)] >> 4);
                     var a2 = ((base64DecodeChars[input.charCodeAt(i + 1)] & 0x000F) << 4) ^ (base64DecodeChars[input.charCodeAt(i + 2)] >> 2);
                     var a3 = ((base64DecodeChars[input.charCodeAt(i + 2)] & 0x0003) << 6) ^ (base64DecodeChars[input.charCodeAt(i + 3)] & 0x003F);
-                    var c1 = "%" + parse16[~~(a1 / 16)] + parse16[a1 % 16];
-                    var c2 = "%" + parse16[~~(a2 / 16)] + parse16[a2 % 16];
-                    var c3 = "%" + parse16[~~(a3 / 16)] + parse16[a3 % 16];
+                    var c1 = "%" + a1.toString(16);
+                    var c2 = "%" + a2.toString(16);
+                    var c3 = "%" + a3.toString(16);
                     output = output + c1 + c2 + c3;
                 }
                 console.log("n: " + n + "\noutput: " + output);
