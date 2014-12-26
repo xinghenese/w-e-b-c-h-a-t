@@ -6,24 +6,40 @@ define(['Base', 'Utils/CommonUtils', 'Logger/Logger'], function(Base, CommonUtil
 
     var socketConfigAdapter = {
         host: CommonUtils.STRING_NOT_SET,
-        port: CommonUtils.STRING_NOT_SET,
+        port: CommonUtils.STRING_NOT_SET
     };
 
     var socketListenerAdapter = {
 //        onopen: CommonUtils.FUNCTION_NOT_SET,
-        onmessage: CommonUtils.FUNCTION_NOT_SET,
-        onclose: CommonUtils.FUNCTION_NOT_SET,
-        onerror: CommonUtils.FUNCTION_NOT_SET
+        onConnected: CommonUtils.FUNCTION_NOT_SET,
+        onConnectedFailed: CommonUtils.FUNCTION_NOT_SET,
+        onClose: CommonUtils.FUNCTION_NOT_SET,
+        onClosedByRemote: CommonUtils.FUNCTION_NOT_SET,
+        onData: CommonUtils.FUNCTION_NOT_SET,
+        onError: CommonUtils.FUNCTION_NOT_SET
     };
 
     var SocketPrototype = {
         connect: function(){
-            var url = "ws://" + this.host + ":" + this.port;
+            var _self = this;
+            var url = "ws://" + _self.host + ":" + _self.port;
             var socket = new WebSocket(url);
-            socket.onopen = this.onopen;
-        },
-        onopen: function(){
-
+            socket.onopen = _self.onConnected;
+            socket.onmessage = _self.onData;
+            socket.onerror = _self.onError;
+            socket.onclose = function(evt){
+                if(socket.readyState == 0){
+                    _self.onConnectedFailed(evt);
+                }
+                else{
+                    if(evt.code == 1000){
+                        _self.onClose(evt);
+                    }
+                    else{
+                        _self.onClosedByRemote(evt);
+                    }
+                }
+            }
         }
     };
 

@@ -173,7 +173,7 @@ define(['TreeType', 'TypeCheck', 'CSSUtil'], function(TreeType, TypeCheck, CSSUt
             for(var key in _self){
                 if(_self.hasOwnProperty(key)){
                     var _value = _self[key];
-                    if(!TypeCheck.isFunction(_value) && !TypeCheck.isObject(_value)){
+                    if(!TypeCheck.isFunction(_value) && !TypeCheck.isObject(_value)  && !TypeCheck.isArray(_value)){
                         key = (mapConversion && mapConversion[key]) || key;
                         targetNode.copyAttributes(key, _value);
                     }
@@ -247,13 +247,13 @@ define(['TreeType', 'TypeCheck', 'CSSUtil'], function(TreeType, TypeCheck, CSSUt
     });
 
     HTMLElement.implementMethods({
-        getSubNodeByKey: function(key){
+        getSubNodeByKey: function(key){ //!!Useless. getSubNodeByKey
             //key = (mapConversion && mapConversion[key]) || key;
             if(key != "text"){
                 var _info = key.split('-'),
                     _key = _info[0],
                     _index = _info[1];
-                if(typeof _index !== "undefined"){
+                if(!_key && typeof _index !== "undefined"){ //why to add a condition of "!_key"
                     return this[_key][_index];
                 }
             }

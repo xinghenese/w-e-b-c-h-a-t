@@ -94,7 +94,6 @@ define('CSSUtil',['TypeCheck'], function(TypeCheck){
                     result += this.cssFormat(key) + ":" + obj[key] + ";";
                 }
             }
-            console.info("result: " + result);
             return result;
         }
     };
@@ -243,9 +242,7 @@ define('Base',['TreeType', 'TypeCheck', 'CSSUtil'], function(TreeType, TypeCheck
                         }
                         else if(TypeCheck.isObject(_self[key])){
                             if(key == "style"){
-                                console.info("style: ");
                                 _self[key] = CSSUtil.toCSSText(_self[key]);
-                                console.info(_self[key]);
                             }
                             else{
                                 _subNodeKeys.push(key);
@@ -259,6 +256,10 @@ define('Base',['TreeType', 'TypeCheck', 'CSSUtil'], function(TreeType, TypeCheck
                     }
                 }
             }
+//            if(_hasChild){
+//                console.info("subNodeKey: ");
+//                console.info(_subNodeKeys);
+//            }
             return _hasChild ? _subNodeKeys : null;
         },
         getSubNodeByKey: function(key){
@@ -276,7 +277,7 @@ define('Base',['TreeType', 'TypeCheck', 'CSSUtil'], function(TreeType, TypeCheck
             for(var key in _self){
                 if(_self.hasOwnProperty(key)){
                     var _value = _self[key];
-                    if(!TypeCheck.isFunction(_value) && !TypeCheck.isObject(_value) && !TypeCheck.isArray(_value)){
+                    if(!TypeCheck.isFunction(_value) && !TypeCheck.isObject(_value)  && !TypeCheck.isArray(_value)){
                         key = (mapConversion && mapConversion[key]) || key;
                         targetNode.copyAttributes(key, _value);
                     }
@@ -350,22 +351,6 @@ define('Base',['TreeType', 'TypeCheck', 'CSSUtil'], function(TreeType, TypeCheck
     });
 
     HTMLElement.implementMethods({
-        getSubNodeByKey: function(key){
-            //key = (mapConversion && mapConversion[key]) || key;
-            console.info("subRoot_id: " + this.id);
-            if(key != "text"){
-                var _info = key.split('-'),
-                    _key = _info[0],
-                    _index = _info[1];
-                console.info("_key: " + _key);
-                console.info("_index: " + _index);
-                if(!_key && typeof _index !== "undefined"){
-                    console.info("(key, value):  (" + key + ", " + this[_key][_index] + ")");
-                    return this[_key][_index];
-                }
-            }
-            return this[_key];
-        },
         createAndAppendChild: function(tag, tree, mapConversion){
             var arr = tag.split('-');
             tag = (mapConversion && mapConversion[arr[0]]) || arr[0];
@@ -465,7 +450,7 @@ define('DocumentFactory',['Base', 'TreeType'], function(Base, TreeType){
                         _sourceRootsInfo.push(_sourceNodeInfo);
                         _targetRootsInfo.push(_targetNode);
                         _length ++;
-                        _targetNode = _targetNode.getSubNodeByKey(_targetNodeName);//getSubObjectByNodeName(_targetNode, _sourceNode.getName());
+//                        _targetNode = _targetNode.getSubNodeByKey(_targetNodeName);//getSubObjectByNodeName(_targetNode, _sourceNode.getName());
                     }
                     else{
                         _rootInfo.splice(1, 1);//_rootInfo: [_slef, key1, key2, key3...]
@@ -500,7 +485,6 @@ define('DocumentFactory',['Base', 'TreeType'], function(Base, TreeType){
                 var _sourceNodeInfo = _sourceNode.checkSubNodes();
 
                 _sourceNode.parseAttributes(_targetNode, mapConversion);
-
                 if(_sourceNodeInfo){
                     _sourceRootsInfo.push(_sourceNodeInfo);
                     _targetRootsInfo.push(_targetNode);
@@ -531,56 +515,9 @@ define('DocumentFactory',['Base', 'TreeType'], function(Base, TreeType){
     return DocumentFactory;
 });
 /**
- * Created by Administrator on 2014/12/15.
+ * Created by Administrator on 2014/12/24.
  */
-define('$',['TypeCheck', 'DocumentFactory', 'TreeType', 'CSSUtil'], function(TypeCheck, DocumentFactory, TreeType, CSSUtil){
-    var slice = [].slice, concat = [].concat;
-
-    Object.prototype.each = function(fn, args){
-        if(TypeCheck.likeArray(this)){
-            for(var i  = 0, len = this.length; i < len; i++){
-                fn.apply(this[i], args);
-            }
-        }
-        return this;
-    };
-
-    var $ = function(selector, context, count){
-        context = context && context.nodeType == 1 && context || document;
-        var nodeList = context.querySelectorAll(selector);
-        if(nodeList.length > 1){
-            return nodeList;
-        }
-        else if(nodeList.length == 1){
-            return nodeList[0];
-        }
-        return null;
-    };
-
-    $.isOdd = function(num){
-        return num & 1;
-    };
-
-    $.each = function(obj, fn, args){
-        obj.each(fn, args);
-        return obj;
-    };
-
-    $.createPanel = function(obj, mapConversion){
-        if(TypeCheck.isObject(obj)){
-            return DocumentFactory.parseTree(obj, TreeType.HTMLDocument, mapConversion);
-        }
-    };
-
-    $.merge = function(){
-        for(var i = 0, len = arguments.length, arr = []; i < len; i++){
-            if(TypeCheck.likeArray(arguments[i])) {
-                concat.call(arr, slice.call(arguments[i]));
-            }
-        }
-        return arr;
-    };
-
+define('MathUtil',['TypeCheck'],function(TypeCheck){
     var find = function(array, fn, compare){
         if(compare != -1){
             compare = 1;
@@ -596,14 +533,28 @@ define('$',['TypeCheck', 'DocumentFactory', 'TreeType', 'CSSUtil'], function(Typ
         return ibase;
     };
 
-    $.findMax = function(array, fn){
-        return find(array, fn, 1)
+    var MathUtil = {
+        isOdd: function(num){
+            return num & 1;
+        },
+        isEven: function(num){
+            return this.isOdd(num);
+        },
+        findMax: function(array, fn){
+            return find(array, fn, 1)
+        },
+        findMin: function(array, fn){
+            return find(array, fn, -1)
+        }
     };
 
-    $.findMin = function(array, fn){
-        return find(array, fn, -1)
-    };
+    return MathUtil;
 
+});
+/**
+ * Created by Administrator on 2014/12/17.
+ */
+define('Layout',['Base', 'TypeCheck', 'CSSUtil', 'MathUtil'], function(Base, TypeCheck, CSSUtil, MathUtil){
     HTMLElement.implementMethods({
         getParent: function(){
             return this.parentNode || this.parentElement();
@@ -654,18 +605,12 @@ define('$',['TypeCheck', 'DocumentFactory', 'TreeType', 'CSSUtil'], function(Typ
             var direction = ["Top", "Right", "Bottom", "Left"],
                 messures = ["margin", "border", "padding"],
                 _size = [this.getMessureDigits("height"), this.getMessureDigits("width")];
-            console.info("origin_width: " + _size[1]);
-            console.info("origin_height: " + _size[0]);
             for(var i = 0, ilen = direction.length; i < ilen; i++){
-                for(var j = 0, tmp = _size[$.isOdd(i)], jlen = messures.length; j < jlen; j++){
+                for(var j = 0, tmp = _size[MathUtil.isOdd(i)], jlen = messures.length; j < jlen; j++){
                     tmp -= this.getMessureDigits(messures[j] + direction[i]);
-                    console.log(messures[j] + direction[i] + ": " + this.getMessureDigits(messures[j] + direction[i]));
-                    console.log("tmp: " + tmp);
                 }
-                _size[$.isOdd(i)] = tmp;
+                _size[MathUtil.isOdd(i)] = tmp;
             }
-            console.info("_height: " + _size[0]);
-            console.info("_width: " + _size[1]);
             this.style.height = _size[0] + "px";
             this.style.width = _size[1] + "px";
         },
@@ -724,20 +669,18 @@ define('$',['TypeCheck', 'DocumentFactory', 'TreeType', 'CSSUtil'], function(Typ
             })
         },
         setVerticalAlign: function(baseElement, direction){
-            console.info("NodeList.setVerticalAlign");
             var _self = this, len = _self.length;
             if(TypeCheck.isString(baseElement)){
                 direction = baseElement;
                 if (direction != "right") {
 //                    console.info("direction: " + direction);
-                    var ibase = $.findMin(_self, function (i) {
+                    var ibase = MathUtil.findMin(_self, function (i) {
 //                        console.info("marginLeft: " + _self[i].getMessureDigits("marginLeft"));
                         return _self[i].getMessureDigits("marginLeft");
                     });
-                    console.info("ibase: " + ibase);
                 }
                 else {
-                    ibase = $.findMax(_self, function (i) {
+                    ibase = MathUtil.findMax(_self, function (i) {
                         return _self[i].getMessureDigits("marginLeft") + _self[i].getMessureDigits("width");
                     });
                 }
@@ -764,7 +707,65 @@ define('$',['TypeCheck', 'DocumentFactory', 'TreeType', 'CSSUtil'], function(Typ
         }
     });
 
+});
+/**
+ * Created by Administrator on 2014/12/15.
+ */
+define('$',['TypeCheck', 'DocumentFactory', 'TreeType', 'CSSUtil', 'Layout'], function(TypeCheck, DocumentFactory, TreeType, CSSUtil, Layout){
+    var slice = [].slice, concat = [].concat;
 
+    Object.prototype.each = function(fn, args){
+        if(TypeCheck.likeArray(this)){
+            for(var i  = 0, len = this.length; i < len; i++){
+                fn.apply(this[i], args);
+            }
+        }
+        return this;
+    };
+
+    var $ = function(selector, context, count){
+        context = context && context.nodeType == 1 && context || document;
+        var nodeList = context.querySelectorAll(selector);
+        if(nodeList.length > 1){
+            return nodeList;
+        }
+        else if(nodeList.length == 1){
+            return nodeList[0];
+        }
+        return null;
+    };
+
+    $.each = function(obj, fn, args){
+        obj.each(fn, args);
+        return obj;
+    };
+
+    $.createPanel = function(obj, mapConversion){
+        if(TypeCheck.isObject(obj)){
+            return DocumentFactory.parseTree(obj, TreeType.HTMLDocument, mapConversion);
+        }
+    };
+
+    $.createXMLDocument = function(obj, mapConversion){
+        if(TypeCheck.isObject(obj)){
+            return DocumentFactory.parseTree(obj, TreeType.XMLDocument, mapConversion);
+        }
+    };
+
+    $.parseXMLToString = function(xml){
+        if(TypeCheck.isXMLDocument(xml)){
+            return DocumentFactory.parseXMLToString(xml);
+        }
+    };
+
+    $.merge = function(){
+        for(var i = 0, len = arguments.length, arr = []; i < len; i++){
+            if(TypeCheck.likeArray(arguments[i])) {
+                concat.call(arr, slice.call(arguments[i]));
+            }
+        }
+        return arr;
+    };
 
     return $;
 });
@@ -785,55 +786,22 @@ require(['$'], function($){
     function createBox(){
         var box = $.createPanel({
             id: "msgBox",
-            style: {
-                width: "464px",
-                height: "243px",
-                position: "absolute",
-                color: "#1d1d1d",
-                backgroundColor: "#FFFFFF"
-            },
+            "class": "msgBox",
             div: [{
                 id: "box_title",
-                text: "意见反馈",
-                style: {
-                    width: "100%",
-                    height: "52px",
-                    backgroundColor: "#F8F8F4",
-                    font: "14px 宋体"
-                }
+                "class": "box_title",
+                text: "意见反馈"
             },{
                 id: "box_content",
-                style: {
-                    width: "422px",
-                    height: "125px",
-                    margin: "16px 20px 0",
-                    backgroundColor: "#F8F8F7"
-                }
+                "class": "box_content"
             },{
                 id: "btnSend",
-                text: "发送",
-                style: {
-                    width: "82px",
-                    height: "30px",
-                    marginTop: "10px",
-                    backgroundColor: "#21b69d",
-                    color: "#FFFFFF",
-                    font: "14px 宋体",
-                    cursor: "pointer"
-                }
+                "class": "btnSend",
+                text: "发送"
             }, {
                 id: "btnClose",
-                text: "\u00D7",
-                style: {
-                    width: "52px",
-                    height: "52px",
-                    position: "absolute",
-                    top: "0",
-                    right: "0",
-                    color: "#181818",
-                    font: "40px 宋体",
-                    cursor: "pointer"
-                }
+                "class": "btnClose",
+                text: "\u00D7"
             }]
         });
 
@@ -841,111 +809,55 @@ require(['$'], function($){
         $('#box_title, #btnClose', box).setTextCenter();
         $('#box_content, #btnSend', box).setVerticalAlign('right').setTextCenter();
 
-        return box;
+        var _xml = $.createXMLDocument({
+            div: {
+                id: "msgBox",
+                div: [{
+                        id: "title"
+                    },{
+                        id: "content"
+                    },{
+                        id: "btnSend",
+                        style: {
+                            width: "200px",
+                            height: "80px",
+                            backgroundColor: "#DDDDDD"
+                        }
+                    }
+                ]
+            }
+        });
+        console.log($.parseXMLToString(_xml));
 
-//        var _xml = DocumentFactory.parseTree({
-//            div: {
-//                id: "msgBox",
-//                div: [
-//                    {
-//                        id: "title"
-//                    },
-//                    {
-//                        id: "content"
-//                    },
-//                    {
-//                        id: "btnSend",
-//                        style: {
-//                            width: "200px",
-//                            height: "80px",
-//                            backgroundColor: "#DDDDDD"
-//                        }
-//                    }
-//                ]
-//            }
-//        }, TreeType.XMLDocument);
-//        console.log(DocumentFactory.parseXMLToString(_xml));
+        return box;
     }
 
     function createUserList(){
         var view = $.createPanel({
             id: "userlist",
-            style: {
-                width: "280px",
-                height: "800px",
-                position: "absolute",
-                top: "100px",
-                left: "200px",
-                backgroundColor: "#e9eee3"
-            },
+            "class": "userlist",
             div: [{
                 id: "list_title",
-                style: {
-                    width: "100%",
-                    height: "52px",
-                    backgroundColor: "#2fd5d9"
-                }
+                "class": "list_title"
             }, {
                 id: "myAvatar",
-                style: {
-                    width: "58px",
-                    height: "58px",
-                    position: "absolute",
-                    top: "11px",
-                    left: "14px",
-                    borderRadius: "29px",
-                    backgroundColor: "#FFFFFF"
-                }
+                "class": "myAvatar"
             }, {
                 id: "myName",
-                text: "佳宁",
-                style: {
-                    width: "80px",
-                    height: "14px",
-                    position: "absolute",
-                    left: "91px",
-                    top: "22px",
-                    color: "#0d6359",
-                    font: "14px 宋体",
-                    lineHeight: "14px"
-                }
+                "class": "myName",
+                text: "佳宁"
             }, {
                 id: "select",
-                text: "\u2714",
-                style: {
-                    width: "16px",
-                    height: "14px",
-                    position: "absolute",
-                    top: "62px",
-                    right: "36px",
-                    border: "1px #d0d5ca solid",
-                    borderRadius: "4px",
-                    backgroundColor: "#FFFFFF",
-                    color: "#2fd5b9"
-                }
+                "class": "select",
+                text: "\u2714"
             },{
                 id: "search_bar",
-                style: {
-                    width: "auto",
-                    height: "33px",
-                    margin: "42px 13px 7px 9px",
-                    border: "1px #d0d5ca solid",
-                    backgroundColor: "#d0d5ca"
-                },
+                "class": "search_bar",
                 input: {
                     type: "text",
+                    "class": "text",
                     id: "search",
-                    value: "请输入呢称\\聊聊号",
-                    style: {
-                        width:"159px",
-                        height: "100%",
-                        display: "inline-block",
-                        marginRight: "4px",
-                        border: "1px #d0d5ca solid",
-                        padding: "6px 10px",
-                        font: "14px 宋体",
-                        color: "#bfc4b9"
-                    }
+                    value: "请输入呢称\\聊聊号"
                 },
                 div: [//{
 //                    id: "search",
@@ -962,27 +874,12 @@ require(['$'], function($){
 //                },
                     {
                         id: "search_button",
-                        text: "s",
-                        style: {
-                            width: "39px",
-                            height: "100%",
-//                        position: "relative",
-//                        top: "-100%",
-//                        left: "219px",
-                            marginRight: "1px",
-                            backgroundColor: "#FAFFF4",
-                            color: "#bfc4b9"
-                        }
+                        "class": "search_button",
+                        text: "s"
                     }, {
                         id: "search_button2",
-                        text: "sa",
-                        style: {
-                            width: "39px",
-                            height: "100%",
-                            marginRight: "1px",
-                            backgroundColor: "#FAFFF4",
-                            color: "#bfc4b9"
-                        }
+                        "class": "search_button2",
+                        text: "sa"
                     }]
             }]
         });

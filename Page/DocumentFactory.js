@@ -82,7 +82,7 @@ define(['Base', 'TreeType'], function(Base, TreeType){
                         _sourceRootsInfo.push(_sourceNodeInfo);
                         _targetRootsInfo.push(_targetNode);
                         _length ++;
-                        _targetNode = _targetNode.getSubNodeByKey(_targetNodeName);//getSubObjectByNodeName(_targetNode, _sourceNode.getName());
+                        _targetNode = _targetNode.getSubNodeByKey(_targetNodeName);//!!Never Used. getSubObjectByNodeName(_targetNode, _sourceNode.getName());
                     }
                     else{
                         _rootInfo.splice(1, 1);//_rootInfo: [_slef, key1, key2, key3...]

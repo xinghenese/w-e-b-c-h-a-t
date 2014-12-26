@@ -1,0 +1,127 @@
+@CHARSET "UTF-8";
+
+.msgBox{
+    width: 464px;
+    height: 243px;
+    position: absolute;
+    color: #1d1d1d;
+    background-color: #FFFFFF;
+}
+
+.box_title{
+    width: 100%;
+    height: 52px;
+    background-color: #F8F8F4;
+    font: 14px SimSun;
+}
+
+.box_content{
+    width: 422px;
+    height: 125px;
+    margin: 16px 20px 0;
+    background-color: #F8F8F7;
+}
+
+.btnSend{
+    width: 82px;
+    height: 30px;
+    margin-top: 10px;
+    background-color: #21b69d;
+    color: #FFFFFF;
+    font: 14px SimSun;
+    cursor: pointer;
+}
+
+.btnClose{
+    width: 52px;
+    height: 52px;
+    position: absolute;
+    top: 0;
+    right: 0;
+    color: #181818;
+    font: 40px SimSun;
+    cursor: pointer;
+}
+
+.userlist{
+    width: 280px;
+    height: 800px;
+    position: absolute;
+    top: 100px;
+    left: 200px;
+    background-color: #e9eee3
+}
+
+.list_title{
+    width: 100%;
+    height: 52px;
+    background-color: #2fd5d9
+}
+
+.myAvatar{
+    width: 58px;
+    height: 58px;
+    position: absolute;
+    top: 11px;
+    left: 14px;
+    border-radius: 29px;
+    background-color: #FFFFFF
+}
+
+.myName{
+    width: 80px;
+    height: 14px;
+    position: absolute;
+    left: 91px;
+    top: 22px;
+    color: #0d6359;
+    font: 14px SimSun;
+    line-height: 14px
+}
+
+.select{
+    width: 16px;
+    height: 14px;
+    position: absolute;
+    top: 62px;
+    right: 36px;
+    border: 1px #d0d5ca solid;
+    border-radius: 4px;
+    background-color: #FFFFFF;
+    color: #2fd5b9
+}
+
+.search_bar{
+    width: auto;
+    height: 33px;
+    margin: 42px 13px 7px 9px;
+    border: 1px #d0d5ca solid;
+    background-color: #d0d5ca
+}
+
+.text{
+    width:159px;
+    height: 100%;
+    display: inline-block;
+    margin-right: 4px;
+    border: 1px #d0d5ca solid;
+    padding: 6px 10px;
+    font: 14px SimSun;
+    color: #bfc4b9
+}
+
+.search_button{
+    width: 39px;
+    height: 100%;
+    margin-right: 1px;
+    background-color: #FAFFF4;
+    color: #bfc4b9
+}
+
+.search_button2{
+    width: 39px;
+    height: 100%;
+    margin-right: 1px;
+    background-color: #FAFFF4;
+    color: #bfc4b9
+}

@@ -1,7 +1,7 @@
 /**
  * Created by Administrator on 2014/12/17.
  */
-define(['Base', 'TypeCheck', 'CSSUtil', '$'], function(Base, TypeCheck, CSSUtil, $){
+define(['Base', 'TypeCheck', 'CSSUtil', 'MathUtil'], function(Base, TypeCheck, CSSUtil, MathUtil){
     HTMLElement.implementMethods({
         getParent: function(){
             return this.parentNode || this.parentElement();
@@ -55,12 +55,12 @@ define(['Base', 'TypeCheck', 'CSSUtil', '$'], function(Base, TypeCheck, CSSUtil,
             console.info("origin_width: " + _size[1]);
             console.info("origin_height: " + _size[0]);
             for(var i = 0, ilen = direction.length; i < ilen; i++){
-                for(var j = 0, tmp = _size[$.isOdd(i)], jlen = messures.length; j < jlen; j++){
+                for(var j = 0, tmp = _size[MathUtil.isOdd(i)], jlen = messures.length; j < jlen; j++){
                     tmp -= this.getMessureDigits(messures[j] + direction[i]);
                     console.log(messures[j] + direction[i] + ": " + this.getMessureDigits(messures[j] + direction[i]));
                     console.log("tmp: " + tmp);
                 }
-                _size[$.isOdd(i)] = tmp;
+                _size[MathUtil.isOdd(i)] = tmp;
             }
             console.info("_height: " + _size[0]);
             console.info("_width: " + _size[1]);
@@ -128,14 +128,14 @@ define(['Base', 'TypeCheck', 'CSSUtil', '$'], function(Base, TypeCheck, CSSUtil,
                 direction = baseElement;
                 if (direction != "right") {
 //                    console.info("direction: " + direction);
-                    var ibase = $.findMin(_self, function (i) {
+                    var ibase = MathUtil.findMin(_self, function (i) {
 //                        console.info("marginLeft: " + _self[i].getMessureDigits("marginLeft"));
                         return _self[i].getMessureDigits("marginLeft");
                     });
                     console.info("ibase: " + ibase);
                 }
                 else {
-                    ibase = $.findMax(_self, function (i) {
+                    ibase = MathUtil.findMax(_self, function (i) {
                         return _self[i].getMessureDigits("marginLeft") + _self[i].getMessureDigits("width");
                     });
                 }
