@@ -1,7 +1,7 @@
 /**
  * Created by Administrator on 2014/12/15.
  */
-define(['TypeCheck'], function(TypeCheck){
+define(['TypeCheckExtender'], function(TypeCheck){
     return {
         cssFormat: function(input){
             return input.replace(/([A-Z])/g, function(){

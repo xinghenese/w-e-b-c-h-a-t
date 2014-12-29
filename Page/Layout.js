@@ -1,7 +1,16 @@
 /**
  * Created by Administrator on 2014/12/17.
  */
-define(['Base', 'TypeCheck', 'CSSUtil', 'MathUtil'], function(Base, TypeCheck, CSSUtil, MathUtil){
+define(['Base', 'TypeCheckExtender', 'CSSUtil', 'MathUtil'], function(Base, TypeCheck, CSSUtil, MathUtil){
+    Object.prototype.each = function(fn, args){
+        if(TypeCheck.likeArray(this)){
+            for(var i  = 0, len = this.length; i < len; i++){
+                fn.apply(this[i], args);
+            }
+        }
+        return this;
+    };
+
     HTMLElement.implementMethods({
         getParent: function(){
             return this.parentNode || this.parentElement();
@@ -52,18 +61,18 @@ define(['Base', 'TypeCheck', 'CSSUtil', 'MathUtil'], function(Base, TypeCheck, C
             var direction = ["Top", "Right", "Bottom", "Left"],
                 messures = ["margin", "border", "padding"],
                 _size = [this.getMessureDigits("height"), this.getMessureDigits("width")];
-            console.info("origin_width: " + _size[1]);
-            console.info("origin_height: " + _size[0]);
+//            console.info("origin_width: " + _size[1]);
+//            console.info("origin_height: " + _size[0]);
             for(var i = 0, ilen = direction.length; i < ilen; i++){
                 for(var j = 0, tmp = _size[MathUtil.isOdd(i)], jlen = messures.length; j < jlen; j++){
                     tmp -= this.getMessureDigits(messures[j] + direction[i]);
-                    console.log(messures[j] + direction[i] + ": " + this.getMessureDigits(messures[j] + direction[i]));
-                    console.log("tmp: " + tmp);
+//                    console.log(messures[j] + direction[i] + ": " + this.getMessureDigits(messures[j] + direction[i]));
+//                    console.log("tmp: " + tmp);
                 }
                 _size[MathUtil.isOdd(i)] = tmp;
             }
-            console.info("_height: " + _size[0]);
-            console.info("_width: " + _size[1]);
+//            console.info("_height: " + _size[0]);
+//            console.info("_width: " + _size[1]);
             this.style.height = _size[0] + "px";
             this.style.width = _size[1] + "px";
         },
@@ -122,7 +131,7 @@ define(['Base', 'TypeCheck', 'CSSUtil', 'MathUtil'], function(Base, TypeCheck, C
             })
         },
         setVerticalAlign: function(baseElement, direction){
-            console.info("NodeList.setVerticalAlign");
+//            console.info("NodeList.setVerticalAlign");
             var _self = this, len = _self.length;
             if(TypeCheck.isString(baseElement)){
                 direction = baseElement;
@@ -132,7 +141,7 @@ define(['Base', 'TypeCheck', 'CSSUtil', 'MathUtil'], function(Base, TypeCheck, C
 //                        console.info("marginLeft: " + _self[i].getMessureDigits("marginLeft"));
                         return _self[i].getMessureDigits("marginLeft");
                     });
-                    console.info("ibase: " + ibase);
+//                    console.info("ibase: " + ibase);
                 }
                 else {
                     ibase = MathUtil.findMax(_self, function (i) {

@@ -15,55 +15,22 @@ require(['$'], function($){
     function createBox(){
         var box = $.createPanel({
             id: "msgBox",
-            style: {
-                width: "464px",
-                height: "243px",
-                position: "absolute",
-                color: "#1d1d1d",
-                backgroundColor: "#FFFFFF"
-            },
+            "class": "msgBox",
             div: [{
                 id: "box_title",
-                text: "意见反馈",
-                style: {
-                    width: "100%",
-                    height: "52px",
-                    backgroundColor: "#F8F8F4",
-                    font: "14px 宋体"
-                }
+                "class": "box_title",
+                text: "意见反馈"
             },{
                 id: "box_content",
-                style: {
-                    width: "422px",
-                    height: "125px",
-                    margin: "16px 20px 0",
-                    backgroundColor: "#F8F8F7"
-                }
+                "class": "box_content"
             },{
                 id: "btnSend",
-                text: "发送",
-                style: {
-                    width: "82px",
-                    height: "30px",
-                    marginTop: "10px",
-                    backgroundColor: "#21b69d",
-                    color: "#FFFFFF",
-                    font: "14px 宋体",
-                    cursor: "pointer"
-                }
+                "class": "btnSend",
+                text: "发送"
             }, {
                 id: "btnClose",
-                text: "\u00D7",
-                style: {
-                    width: "52px",
-                    height: "52px",
-                    position: "absolute",
-                    top: "0",
-                    right: "0",
-                    color: "#181818",
-                    font: "40px 宋体",
-                    cursor: "pointer"
-                }
+                "class": "btnClose",
+                text: "\u00D7"
             }]
         });
 
@@ -71,111 +38,55 @@ require(['$'], function($){
         $('#box_title, #btnClose', box).setTextCenter();
         $('#box_content, #btnSend', box).setVerticalAlign('right').setTextCenter();
 
-        return box;
+        var _xml = $.createXMLDocument({
+            div: {
+                id: "msgBox",
+                div: [{
+                    id: "title"
+                },{
+                    id: "content"
+                },{
+                    id: "btnSend",
+                    style: {
+                        width: "200px",
+                        height: "80px",
+                        backgroundColor: "#DDDDDD"
+                    }
+                }
+                ]
+            }
+        });
+        console.log($.parseXMLToString(_xml));
 
-//        var _xml = DocumentFactory.parseTree({
-//            div: {
-//                id: "msgBox",
-//                div: [
-//                    {
-//                        id: "title"
-//                    },
-//                    {
-//                        id: "content"
-//                    },
-//                    {
-//                        id: "btnSend",
-//                        style: {
-//                            width: "200px",
-//                            height: "80px",
-//                            backgroundColor: "#DDDDDD"
-//                        }
-//                    }
-//                ]
-//            }
-//        }, TreeType.XMLDocument);
-//        console.log(DocumentFactory.parseXMLToString(_xml));
+        return box;
     }
 
     function createUserList(){
         var view = $.createPanel({
             id: "userlist",
-            style: {
-                width: "280px",
-                height: "800px",
-                position: "absolute",
-                top: "100px",
-                left: "200px",
-                backgroundColor: "#e9eee3"
-            },
+            "class": "userlist",
             div: [{
                 id: "list_title",
-                style: {
-                    width: "100%",
-                    height: "52px",
-                    backgroundColor: "#2fd5d9"
-                }
+                "class": "list_title"
             }, {
                 id: "myAvatar",
-                style: {
-                    width: "58px",
-                    height: "58px",
-                    position: "absolute",
-                    top: "11px",
-                    left: "14px",
-                    borderRadius: "29px",
-                    backgroundColor: "#FFFFFF"
-                }
+                "class": "myAvatar"
             }, {
                 id: "myName",
-                text: "佳宁",
-                style: {
-                    width: "80px",
-                    height: "14px",
-                    position: "absolute",
-                    left: "91px",
-                    top: "22px",
-                    color: "#0d6359",
-                    font: "14px 宋体",
-                    lineHeight: "14px"
-                }
+                "class": "myName",
+                text: "佳宁"
             }, {
                 id: "select",
-                text: "\u2714",
-                style: {
-                    width: "16px",
-                    height: "14px",
-                    position: "absolute",
-                    top: "62px",
-                    right: "36px",
-                    border: "1px #d0d5ca solid",
-                    borderRadius: "4px",
-                    backgroundColor: "#FFFFFF",
-                    color: "#2fd5b9"
-                }
+                "class": "select",
+                text: "\u2714"
             },{
                 id: "search_bar",
-                style: {
-                    width: "auto",
-                    height: "33px",
-                    margin: "42px 13px 7px 9px",
-                    border: "1px #d0d5ca solid",
-                    backgroundColor: "#d0d5ca"
-                },
+                "class": "search_bar",
                 input: {
                     type: "text",
+                    "class": "text",
                     id: "search",
-                    value: "请输入呢称\\聊聊号",
-                    style: {
-                        width:"159px",
-                        height: "100%",
-                        display: "inline-block",
-                        marginRight: "4px",
-                        border: "1px #d0d5ca solid",
-                        padding: "6px 10px",
-                        font: "14px 宋体",
-                        color: "#bfc4b9"
-                    }
+                    value: "请输入呢称\\聊聊号"
                 },
                 div: [//{
 //                    id: "search",
@@ -192,27 +103,12 @@ require(['$'], function($){
 //                },
                     {
                         id: "search_button",
-                        text: "s",
-                        style: {
-                            width: "39px",
-                            height: "100%",
-//                        position: "relative",
-//                        top: "-100%",
-//                        left: "219px",
-                            marginRight: "1px",
-                            backgroundColor: "#FAFFF4",
-                            color: "#bfc4b9"
-                        }
+                        "class": "search_button",
+                        text: "s"
                     }, {
                         id: "search_button2",
-                        text: "sa",
-                        style: {
-                            width: "39px",
-                            height: "100%",
-                            marginRight: "1px",
-                            backgroundColor: "#FAFFF4",
-                            color: "#bfc4b9"
-                        }
+                        "class": "search_button2",
+                        text: "sa"
                     }]
             }]
         });

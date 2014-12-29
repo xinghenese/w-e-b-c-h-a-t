@@ -1,7 +1,7 @@
 /**
  * Created by Administrator on 2014/12/24.
  */
-define(['TypeCheck'], function(TypeCheck){
+define(['TypeCheckExtender'], function(TypeCheck){
     var find = function(array, fn, compare){
         if(compare != -1){
             compare = 1;

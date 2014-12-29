@@ -1,7 +1,7 @@
 /**
  * Created by Administrator on 2014/12/3.
  */
-define(['Base', 'TreeType'], function(Base, TreeType){
+define(['Base', 'TypeCheckExtender', 'TreeImpl', 'TreeType'], function(Base, TypeCheck, TreeImpl, TreeType){
     var DocumentFactory = {
         createDocument: function(root){
             if (window.ActiveXObject){
@@ -72,7 +72,7 @@ define(['Base', 'TreeType'], function(Base, TreeType){
             while(_length > 0 || _initializing()){
                 var _rootInfo = _sourceRootsInfo[_length - 1];
                 var _sourceNodeKey = _rootInfo[1];
-                if(typeof(_sourceNodeKey) != "undefined"){
+                if(!TypeCheck.isUndefined(_sourceNodeKey)){
                     _sourceNode = _rootInfo[0].getSubNodeByKey(_sourceNodeKey); //key is used to search a node
                     var _targetNodeName = _sourceNode.tagName || _sourceNodeKey;    //name is used to create a node
                     _targetNode = _targetRootsInfo[_length - 1].createAndAppendChild(_targetNodeName, _resultTree, mapConversion);
