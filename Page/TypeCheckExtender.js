@@ -19,8 +19,14 @@ define(['Base', 'TypeCheck'], function(Base, TypeCheck){
         this.isEmptyArray = function(array){
             return this.isArray(array) && !array;
         };
+        this.isNonEmptyArray = function(array){
+            return this.isArray(array) && array;
+        };
         this.isEmptyObject = function(obj){
             return this.isObject(obj) && !obj;
+        };
+        this.isNonEmptyObject = function(obj){
+            return this.isObject(obj) && obj;
         };
     }).inherits(TypeCheck));
 

@@ -1,7 +1,7 @@
 /**
  * Created by Administrator on 2014/12/29.
  */
-define(['../../Utils/CommonUtils'], function(CommonUtils){
+define(['../CommonUtils'], function(CommonUtils){
     return {
         strMessageUuid:         CommonUtils.STRING_NOT_SET,
         intSenderId:            CommonUtils.INT_NOT_SET,

@@ -1,14 +1,14 @@
 /**
  * Created by Administrator on 2014/12/29.
  */
-define(['TypeCheckExtender', '../Utils/CommonUtils'], function(TypeCheck, CommonUtils){
+define(['TypeCheckExtender', 'CommonUtils'], function(TypeCheck, CommonUtils){
     function CollectionPrototype(fnTemplate){
         // a kind of Template accords with a CollectionPrototype instance
         // but if adding some extra properties based on the pre Template, how
         // to reuse the pre Template and extend the CollectionPrototype
         var _instanceList  = [];
-        this.init = function() {
-            return _instanceList.push(new fnTemplate());
+        this.init = function(){
+            return _instanceList.push(new fnTemplate()) - 1;
         };
         this.getProperty = function(key){
             var _val = (_instanceList[this.getIndex()])[key];
@@ -38,15 +38,17 @@ define(['TypeCheckExtender', '../Utils/CommonUtils'], function(TypeCheck, Common
             delete _instanceList[this.getIndex()];
             return this;
         };
+        //define a prototype method with the same name as that of instance method so that instances could not access
+        //this prototype method, yet available through constructor.prototype
         this.getIndex = function(){
             return _instanceList;
         };
     }
 
     var _createProxyConstructor = function(fnTemplate){
-        return (function () {
+        return (function (){
             var _index = this.init();
-            this.getIndex = function () {
+            this.getIndex = function(){
                 return _index;
             };
             this.init = null;   //  Reset the function in order to overrides the prototype function and set it as a
@@ -60,9 +62,9 @@ define(['TypeCheckExtender', '../Utils/CommonUtils'], function(TypeCheck, Common
             return {
                 createInstance: function(obj){
                     var _instance = new ProxyPrototype();
-                    if(!TypeCheck.isEmptyObject(obj)){
-                        for (var key in obj) {
-                            if (obj.hasOwnProperty(key)) {
+                    if(TypeCheck.isNonEmptyObject(obj)){
+                        for(var key in obj){
+                            if(obj.hasOwnProperty(key)){
                                 _instance.setProperty(key, obj[key]);
                             }
                         }
@@ -87,9 +89,9 @@ define(['TypeCheckExtender', '../Utils/CommonUtils'], function(TypeCheck, Common
             return {
                 createItem: function(obj){
                     var _instance = new ProxyPrototype();
-                    if(!TypeCheck.isEmptyObject(obj)){
-                        for (var key in obj) {
-                            if (obj.hasOwnProperty(key)) {
+                    if(TypeCheck.isNonEmptyObject(obj)){
+                        for(var key in obj){
+                            if(obj.hasOwnProperty(key)){
                                 _instance.setProperty(key, obj[key]);
                             }
                         }

@@ -1,7 +1,7 @@
 /**
  * Created by Administrator on 2014/12/29.
  */
-define(['../../Utils/CommonUtils'], function(CommonUtils){
+define(['../CommonUtils'], function(CommonUtils){
     return {
         intCustomId:            CommonUtils.INT_NOT_SET,
         strGroupName:           CommonUtils.STRING_NOT_SET,
