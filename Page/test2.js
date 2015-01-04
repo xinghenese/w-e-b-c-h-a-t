@@ -2,7 +2,7 @@
  * Created by Administrator on 2014/12/15.
  */
 define('TypeCheck',[],function(){
-    var toString = {}.toString,
+    var toString = ({}.toString),
         test = function(type, suffix){
             suffix = suffix && ("\\w*" + suffix);
             return function(variable){
@@ -28,10 +28,43 @@ define('Base',['TypeCheck'], function(TypeCheck){
     Object.prototype.iterate = function(fn, args){
         for(var key in this){
             if(this.hasOwnProperty(key)){
-                fn.call(this, key, args);
+                fn.call(this, key, this[key], args);
             }
         }
         return this;
+    };
+
+    Array.prototype.each = function(fn, args){
+        if(TypeCheck.isFunction(fn)){
+            var _fn = fn.length ?
+                //needs more info about the items and array
+                function(item, index, args){
+                    return fn(item, index, args);
+                } :
+                //needs no other info except for items.
+                //items treated as subjects more than objects of the process.
+                function(item){
+                    return fn.call(item);
+                };
+            for(var i  = 0, len = this.length; i < len; i++){
+                if(_fn(this[i], i, args)){
+                    break;
+                }
+            }
+        }
+        return this;
+    };
+
+    Array.prototype.contains = function(item){
+        var _contains = false;
+        this.each(function(_item){
+            return (_contains = _item == item);
+        });
+        return _contains;
+    };
+
+    NodeList.prototype.each = function(fn, args){
+        return Array.prototype.each.call(this, fn, args);
     };
 
     Object.prototype.basicClone = function(){
@@ -91,15 +124,6 @@ define('Base',['TypeCheck'], function(TypeCheck){
         return this;
     };
 
-//    Object.prototype.each = function(fn, args){
-//        if(TypeCheck.likeArray(this)){
-//            for(var i  = 0, len = this.length; i < len; i++){
-//                fn.apply(this[i], args);
-//            }
-//        }
-//        return this;
-//    };
-
     Function.prototype.method = function(type, func){
         if (!this.prototype[type]){
             this.prototype[type] = func;
@@ -111,23 +135,96 @@ define('Base',['TypeCheck'], function(TypeCheck){
         return (this.getAdapter() || this.prototype)[name];
     };
 
-    Function.prototype.implementMethods = function(funcObj){
-        var _self = this;
-        funcObj.iterate(function(key){
-            if(TypeCheck.isFunction(funcObj[key])){
-                _self.prototype[key] = funcObj[key];
+    Function.prototype.getName = function(){
+        return ((this.toString()).match(/function\s(.*?)\(/))[1] || "Anonymous";
+    };
+
+    var _topClass = [];
+
+    Function.prototype.implementMethods = function(funcObj, arrMethods, fnProcess){
+        if(TypeCheck.isObject(funcObj) && funcObj){
+            var _proto = this.prototype, _methods, _name;
+            if(!this.hasOwnProperty("_methods")){
+                this._methods = [];
             }
-        });
+            _methods = this._methods;
+
+            var _fn = function(process){
+                return function(key){
+                    var _method = funcObj[key];
+                    if(TypeCheck.isFunction(_method)){
+                        _proto[key] = process && process(_method) || _method;
+                        _methods.push(key);
+                    }
+                }
+            };
+
+            if(TypeCheck.isArray(arrMethods) && arrMethods){
+                if(TypeCheck.isFunction(fnProcess) && fnProcess){
+                    console.info(fnProcess);
+                    arrMethods.each(_fn(fnProcess));
+                }
+                else{
+                    arrMethods.each(_fn());
+                }
+            }
+            else{
+                funcObj.iterate(_fn());
+            }
+
+            if(!_topClass.contains(_name = this.getName())){
+                _topClass.unshift(_name);
+            }
+        console.info("_topClass: ");
+        console.log("[" + _topClass + "]");
+        console.log(_name + "  %cImplements: ", "color:green; font-weight:bold;");
+        console.log("[" + _methods + "]");
+        }
         return this;
     };
 
     Function.prototype.overrides = function(funcObj){
-        var _self = this;
-        funcObj.iterate(function(key){
-            if(TypeCheck.isFunction(_self[key])){
-                _self[key] = this[key];
-            }
+        var _proto = this.prototype, _methods, _super_methods, _name;
+        if(!this.hasOwnProperty("_methods")){
+            this._methods = [];
+        }
+        _methods = this._methods;
+
+        //Test
+        var _item = "";
+
+        _topClass.each(function(item){
+            return (_proto instanceof (item = window[_item = item])) && (_super_methods = item._methods);
         });
+
+        if(_super_methods){
+            _super_methods.each(function(item){
+                if(funcObj.hasOwnProperty(item)){
+                    _proto[item] = funcObj[item];
+                    _methods.push(item);
+                }
+            });
+
+            if(!_topClass.contains(_name = this.getName())){
+                _topClass.unshift(_name);
+            }
+            console.info("_topClass: ");
+            console.log("[" + _topClass + "]");
+            console.log(_name + "  %cOverrides: ", "color:red; font-weight:bold;", _item);
+//
+            console.log("[" + _methods + "]");
+        }
+
+
+//        else{
+//            funcObj.iterate(function(key){
+//                if(TypeCheck.isFunction(_proto[key])){
+//                    _proto[key] = this[key];
+//                }
+//            });
+//        }
+
+
         return this;
     };
 
@@ -167,7 +264,7 @@ define('TypeCheckExtender',['Base', 'TypeCheck'], function(Base, TypeCheck){
             return num == +num;
         };
         this.likeArray = function(list){
-            return this.isNumber(list.length);
+            return this.isNumber(list.length) && list[0];
         };
         this.isEmptyArray = function(array){
             return this.isArray(array) && !array;
@@ -218,14 +315,42 @@ define('TypeCheckExtender',['Base', 'TypeCheck'], function(Base, TypeCheck){
  * Created by Administrator on 2015/1/1.
  */
 define('BaseExtender',['Base', 'TypeCheckExtender'], function(Base, TypeCheck){
-    Object.prototype.each = function(fn, args){
-        if(TypeCheck.likeArray(this)){
-            for(var i  = 0, len = this.length; i < len; i++){
-                fn.apply(this[i], args);
-            }
-        }
-        return this;
-    };
+//    Array.prototype.each = function(fn, args){
+//        if(TypeCheck.isFunction(fn)){
+//            var _fn = fn.length ?
+//                //needs more info about the items and array
+//                function(item, index, args){
+//                    fn(item, index, args);
+//                } :
+//                //needs no other info except for items.
+//                //items treated as subjects more than objects of the process.
+//                function(item){
+//                    fn.call(item);
+//                };
+//            for(var i  = 0, len = this.length; i < len; i++){
+//                _fn(this[i], i, args);
+//            }
+//        }
+//        return this;
+//    };
+//    NodeList.prototype.each = function(fn, args){
+//        return Array.prototype.each.call(this, fn, args);
+//    };
+//    Object.prototype.each = function(fn, args){
+//        if(TypeCheck.likeArray(this)){
+//            for(var i  = 0, len = this.length; i < len; i++){
+////                if(fn.length){
+////                    fn(this[i], i, args);
+////                }
+////                else{
+////                    fn.apply(window, [this[i], i, args]);
+////                }
+//                fn.apply(this[i], args);//fn(this[i], args);   function(item, index, args);
+//                //fn.call(this[i]); fn(this[i], i, args)
+//            }
+//        }
+//        return this;
+//    };
 });
 /**
  * Created by Administrator on 2014/12/15.
@@ -235,7 +360,8 @@ define('TreeType',[],function(){
         Object: 1,
         Wrapper: 2,
         XMLDocument: 3,
-        HTMLDocument: 4
+        HTMLDocument: 4,
+        DocumentFragment: 5
     };
 });
 /**
@@ -284,7 +410,7 @@ define('TreeImpl',['Base', 'TypeCheckExtender', 'TreeType', 'CSSUtil'], function
         }
     });
 
-    Document.implementMethods({
+    Document.overrides({
         getTreeType: function(){
             return TreeType.XMLDocument;
         },
@@ -293,12 +419,25 @@ define('TreeImpl',['Base', 'TypeCheckExtender', 'TreeType', 'CSSUtil'], function
         }
     });
 
-    HTMLDocument.implementMethods({
+    HTMLDocument.overrides({
         getTreeType: function(){
             return TreeType.HTMLDocument;
         },
         getRoot: function(){
+//            return this.appendChild(document.createElement("div"));
             return document.createElement("div");
+        }
+    });
+
+    DocumentFragment.overrides({
+        getTreeType: function(){
+            return TreeType.DocumentFragment;
+        },
+        getRoot: function(){
+            if(!this.root){
+                this.root = this.appendChild(document.createElement("div"));
+            }
+            return this.root;
         }
     });
 
@@ -373,7 +512,7 @@ define('TreeImpl',['Base', 'TypeCheckExtender', 'TreeType', 'CSSUtil'], function
         }
     });
 
-    Element.implementMethods({
+    Element.overrides({
         checkSubNodes: function(){
             var _self = this;
             var _subNodeKeys = [_self];
@@ -410,14 +549,14 @@ define('TreeImpl',['Base', 'TypeCheckExtender', 'TreeType', 'CSSUtil'], function
         }
     });
 
-    HTMLElement.implementMethods({
+    HTMLElement.overrides({
         createAndAppendChild: function(tag, tree, mapConversion){
             var arr = tag.split('-');
             tag = (mapConversion && mapConversion[arr[0]]) || arr[0];
             if(tag == "text"){
-                return this.appendChild(tree.createTextNode(arr[1] || ""));
+                return this.appendChild(document.createTextNode(arr[1] || ""));
             }
-            return this.appendChild(tree.createElement(tag));
+            return this.appendChild(document.createElement(tag));
         }
     });
 
@@ -514,7 +653,6 @@ define('DocumentFactory',['BaseExtender', 'TypeCheckExtender', 'TreeImpl', 'Tree
                         _sourceRootsInfo.push(_sourceNodeInfo);
                         _targetRootsInfo.push(_targetNode);
                         _length ++;
-                        _targetNode = _targetNode.getSubNodeByKey(_targetNodeName);//!!Never Used. getSubObjectByNodeName(_targetNode, _sourceNode.getName());
                     }
                     else{
                         _rootInfo.splice(1, 1);//_rootInfo: [_slef, key1, key2, key3...]
@@ -568,6 +706,8 @@ define('DocumentFactory',['BaseExtender', 'TypeCheckExtender', 'TreeImpl', 'Tree
                         return DocumentFactory.createDocument(_name);
                     case TreeType.HTMLDocument:
                         return document;
+                    case TreeType.DocumentFragment:
+                        return document.createDocumentFragment();
 //                    case TypeMap.Wrapper:
 //                        return (ClassMap[_name] && ClassMap[_name].createInstance()) || {};
                     case TreeType.Object:
@@ -645,7 +785,7 @@ define('Layout',['BaseExtender', 'TypeCheckExtender', 'CSSUtil', 'MathUtil'], fu
             return this.getStyle(type);
         },
         getMessures: function(type){
-            if(type = this.getStyle(type)){
+            if(type = this.fetchOriginalStyle(type) || this.getStyle(type)){
                 var arr = type.match(/(\d+)\.*\d*(\D*)$/);
                 return {
                     digit: arr[1],
@@ -654,44 +794,40 @@ define('Layout',['BaseExtender', 'TypeCheckExtender', 'CSSUtil', 'MathUtil'], fu
             }
         },
         getMessureDigits: function(type){
-            if(type = this.getStyle(type)){
+            if(type = this.fetchOriginalStyle(type) || this.getStyle(type)){
                 return parseInt(type);
             }
             return 0;
         },
         //only cache the last-modified style
         cacheOriginalStyle: function(type){
-            if(TypeCheck.isUndefined(this.o_style)){
-                this.o_style = {};
+            var _self = this;
+            this.o_style = this.o_style || {};
+            if(TypeCheck.isString(type)){
+                _cacheSingleStyle(type);
             }
-            if(TypeCheck.isUndefined(type)){
-                this.o_style.all = this.style.cssText;
-            }
-            else{
-                this.o_style[type] = this.style[type];
+            else if(TypeCheck.isNonEmptyArray(type)){
+                type.each(function(){
+                    _cacheSingleStyle(this);
+                })
             }
             return this;
-        },
-        fetchOriginalStyle: function(type){
-            if(TypeCheck.isNonEmptyObject(this.o_style)){
-                if(!TypeCheck.isUndefined(type)){
-                    return this.o_style[type] || "";
+
+            function _cacheSingleStyle(type){
+                if(type && _self.getStyle(type)){
+                    _self.o_style[type] = _self.getStyle(type);
                 }
             }
-            return "";
         },
-        fetchAllOriginalStyle: function(){
-            if(TypeCheck.isNonEmptyObject(this.o_style)){
-                return this.o_style.all || "";
-            }
-            return "";
+        fetchOriginalStyle: function(type){
+            return type && this.o_style && this.o_style[type] || "";
         },
         show: function(value){
             this.style.display = value || this.fetchOriginalStyle("display") || "block";
             return this;
         },
         hide: function(){
-            this.cacheOriginalStyle("display").style.display = "none";
+            this.cacheOriginalStyle(["display", "width", "height", "top", "left", "font-size"]).style.display = "none";
             return this;
         },
         float: function(){
@@ -762,32 +898,19 @@ define('Layout',['BaseExtender', 'TypeCheckExtender', 'CSSUtil', 'MathUtil'], fu
         }
     });
 
-    console.log(HTMLElement.prototype);
-
-    HTMLElement.prototype.iterate(function(key){
-        var method = this[key];
-        if(TypeCheck.isFunction(method)){
-            NodeList.prototype[key] = function(){
-                return this.each(function(){
-                    method.call(this, arguments);
-                })
-            }
-        }
-    });
-
-    NodeList.overrides({
+//    console.log(HTMLElement.prototype);
+    NodeList.implementMethods({
+        each: function(fn, args){
+            return Array.prototype.each.call(this, fn, args);
+        },
         setVerticalAlign: function (baseElement, direction) {
-//            console.info("NodeList.setVerticalAlign");
             var _self = this, len = _self.length;
             if (TypeCheck.isString(baseElement)) {
                 direction = baseElement;
                 if (direction != "right") {
-//                    console.info("direction: " + direction);
                     var ibase = MathUtil.findMin(_self, function (i) {
-//                        console.info("marginLeft: " + _self[i].getMessureDigits("marginLeft"));
                         return _self[i].getMessureDigits("marginLeft");
                     });
-//                    console.info("ibase: " + ibase);
                 }
                 else {
                     ibase = MathUtil.findMax(_self, function (i) {
@@ -799,68 +922,29 @@ define('Layout',['BaseExtender', 'TypeCheckExtender', 'CSSUtil', 'MathUtil'], fu
             return _self.each(function () {
                 this.setVerticalAlign(baseElement, direction);
             });
+        },
+        modifyStyle: function(fn, args){
+            return HTMLElement.prototype.modifyStyle.call(this, fn, args);
         }
     });
 
-    console.log(NodeList.prototype);
+    var arrElementMethods = ["show", "hide", "float", "borderBox", "setCenter", "setTextCenter"];
 
-//    NodeList.implementMethods({
-//        show: function(){
-//            return this.each(function(){
-//                this.show();
-//            })
-//        },
-//        hide: function(){
-//            return this.each(function(){
-//                this.hide();
-//            })
-//        },
-//        setVerticalAlign: function(baseElement, direction){
-////            console.info("NodeList.setVerticalAlign");
-//            var _self = this, len = _self.length;
-//            if(TypeCheck.isString(baseElement)){
-//                direction = baseElement;
-//                if (direction != "right") {
-////                    console.info("direction: " + direction);
-//                    var ibase = MathUtil.findMin(_self, function (i) {
-////                        console.info("marginLeft: " + _self[i].getMessureDigits("marginLeft"));
-//                        return _self[i].getMessureDigits("marginLeft");
-//                    });
-////                    console.info("ibase: " + ibase);
-//                }
-//                else {
-//                    ibase = MathUtil.findMax(_self, function (i) {
-//                        return _self[i].getMessureDigits("marginLeft") + _self[i].getMessureDigits("width");
-//                    });
-//                }
-//                baseElement = _self[ibase];
-//            }
-//            return _self.each(function(){
-//                this.setVerticalAlign(baseElement, direction);
-//            });
-//        },
-//        setTextCenter: function(){
-//            return this.each(function(){
-//                this.setTextCenter();
-//            });
-//        },
-//        borderBox: function(){
-//            return this.each(function(){
-//                this.borderBox();
-//            });
-//        },
-//        float: function(){
-//            return this.each(function(){
-//                this.float();
-//            });
-//        },
-//        modifyStyle: function(fn, args){
-//            return this.each(function(){
-//                this.modifyStyle(fn, args);
-//            });
-//        }
-//    });
+    NodeList.implementMethods(HTMLElement.prototype, ["show", "hide", "float", "borderBox", "setCenter", "setTextCenter"], function(method, self){
+        return function(){
+//            console.log("invoke");
+            var args = arguments;   //cache arguments of outer anonymous function
+            return this.each(function(){
+                method.apply(this, args); //use apply method 'cause args: Arguments Object in nature
+                //is an Array-like Object
+            })
+        }
     });
+
+    console.log("show");
+    console.log(NodeList.prototype.show);
+
+});
 /**
  * Created by Administrator on 2014/12/15.
  */
@@ -891,14 +975,22 @@ define('$',['TypeCheckExtender', 'DocumentFactory', 'TreeType', 'CSSUtil', 'Layo
 
     $.createPanel = function(obj, mapConversion){
         if(TypeCheck.isObject(obj)){
-            return DocumentFactory.parseTree(obj, TreeType.HTMLDocument, mapConversion);
+            var _time = +(new Date());
+            var fragment =  DocumentFactory.parseTree(obj, TreeType.DocumentFragment, mapConversion);
+//            var fragment =  DocumentFactory.parseTree(obj, TreeType.HTMLDocument, mapConversion);
+            console.log("time: " + ((+new Date()) - _time) + "ms");
+//            return fragment;
+            document.body.appendChild(fragment);
+            return fragment.getRoot();
         }
+        return null;
     };
 
     $.createXMLDocument = function(obj, mapConversion){
         if(TypeCheck.isObject(obj)){
             return DocumentFactory.parseTree(obj, TreeType.XMLDocument, mapConversion);
         }
+        return null;
     };
 
     $.parseXMLToString = function(xml){
@@ -954,9 +1046,12 @@ require(['$'], function($){
             }]
         });
 
+
         box.setCenter();
         $('#box_title, #btnClose', box).setTextCenter();
-        $('#box_content, #btnSend', box).setVerticalAlign('right').setTextCenter();
+        $('#box_content, #btnSend', box).modifyStyle(function(){
+            this.setVerticalAlign('right').setTextCenter();
+        });
 
         var _xml = $.createXMLDocument({
             div: {
@@ -1033,7 +1128,9 @@ require(['$'], function($){
             }]
         });
 
-        $('#search, #search_button, #search_button2', view).float().borderBox().setTextCenter();
+        $('#search, #search_button, #search_button2', view).float().modifyStyle(function(){
+            this.borderBox().setTextCenter();
+        });
 //        $('#search, #search_button, #search_button2', view).borderBox().setTextCenter();
         $('#select', view).setTextCenter();
 
